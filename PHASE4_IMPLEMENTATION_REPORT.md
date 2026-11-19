@@ -1,6 +1,6 @@
 # Phase 4 Implementation Report
 
-**Phase 4 accepted with residual risk: late-return fine calculation was not exercised by final executed HTTP tests; settlement flow and security regressions passed.**
+**Phase 4 accepted; Phase 4.1 verification: PASS with residual risk (duplicate-return e2e and consolidated direct matrix not run).**
 
 ---
 

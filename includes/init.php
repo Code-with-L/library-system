@@ -68,4 +68,5 @@ require_once __DIR__ . '/uploads.php';
 require_once __DIR__ . '/catalogue.php';
 require_once __DIR__ . '/circulation.php';
 require_once __DIR__ . '/fines.php';
+require_once __DIR__ . '/reporting.php';
 require_once __DIR__ . '/../config/database.php';

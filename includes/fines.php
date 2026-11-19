@@ -36,13 +36,16 @@ function fines_amount_string(int $daysOverdue, float $ratePerDay): string
 function fines_get(PDO $pdo, int $fineId): ?array
 {
     $statement = $pdo->prepare(
-        'SELECT f.*, b.user_id, b.book_copy_id, b.status AS borrowing_status, b.return_date, b.due_date
+        'SELECT f.*, b.user_id, b.book_copy_id, b.status AS borrowing_status, b.return_date, b.due_date,
+                bc.copy_code, u.full_name AS student_name
            FROM fines f
            JOIN borrowings b ON b.id = f.borrowing_id
+           JOIN book_copies bc ON bc.id = b.book_copy_id
+           LEFT JOIN users u ON u.id = b.user_id
           WHERE f.id = :id'
     );
     $statement->execute(['id' => $fineId]);
-    return (array) $statement->fetch() ?: null;
+    return $statement->fetch() ?: null;
 }
 
 function fines_fetch(PDO $pdo, array $filters = [], int $limit = 100): array
@@ -63,11 +66,12 @@ function fines_fetch(PDO $pdo, array $filters = [], int $limit = 100): array
 
     $whereSql = $where === [] ? '' : ' WHERE ' . implode(' AND ', $where);
     $statement = $pdo->prepare(
-        'SELECT f.*, b.id AS borrowing_id, b.due_date, b.return_date, b.status AS borrowing_status,
+        'SELECT f.*, b.id AS borrowing_id, bk.title AS book_title, b.due_date, b.return_date, b.status AS borrowing_status,
                 bc.copy_code, u.full_name AS student_name, u.email AS student_email
            FROM fines f
            JOIN borrowings b ON b.id = f.borrowing_id
            JOIN book_copies bc ON bc.id = b.book_copy_id
+           JOIN books bk ON bk.id = bc.book_id
            JOIN users u ON u.id = b.user_id' . $whereSql .
         ' ORDER BY f.id DESC LIMIT ?'
     );
@@ -177,7 +181,8 @@ function fines_existing_for_borrowing(PDO $pdo, int $borrowingId): ?array
 {
     $statement = $pdo->prepare('SELECT * FROM fines WHERE borrowing_id = :id LIMIT 1');
     $statement->execute(['id' => $borrowingId]);
-    return (array) $statement->fetch() ?: null;
+    $row = $statement->fetch();
+    return $row === false ? null : (array) $row;
 }
 
 function fines_lock_borrowing(PDO $pdo, int $borrowingId): ?array
@@ -287,8 +292,8 @@ function fines_settle(PDO $pdo, int $fineId, int $staffId): int
                 FOR UPDATE'
         );
         $statement->execute(['id' => $fineId]);
-        $fine = (array) $statement->fetch();
-        if ($fine === []) {
+        $fine = $statement->fetch();
+        if ($fine === false) {
             $pdo->rollBack();
             throw new FinesConflict('fine_not_found');
         }

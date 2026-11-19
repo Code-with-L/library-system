@@ -23,8 +23,8 @@ $statement = $pdo->prepare(
        FROM borrow_requests WHERE id = :id FOR UPDATE'
 );
 $statement->execute(['id' => (int) $requestId]);
-$request = (array) $statement->fetch();
-if ($request === false || $request === []) {
+$request = $statement->fetch();
+if ($request === false) {
     abort_404('The requested borrow request does not exist.');
 }
 if ((string) $request['status'] !== 'approved') {

@@ -104,6 +104,8 @@ require __DIR__ . '/../../includes/header.php';
             <span class="badge badge--info"><?= e($user['student_number']) ?></span>
         <?php endif; ?>
         <a class="btn btn--ghost btn--sm" href="<?= e(url('account/profile.php')) ?>">Update profile</a>
+        <a class="btn btn--ghost btn--sm" href="<?= e(url('catalogue.php')) ?>">Browse catalogue</a>
+        <a class="btn btn--ghost btn--sm" href="<?= e(url('student/fines.php')) ?>">My fines</a>
     </div>
 </div>
 

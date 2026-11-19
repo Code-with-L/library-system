@@ -12,10 +12,10 @@ if ($id === false || $id === null || $id < 1) {
 }
 $id = (int) $id;
 
-$stmt = $pdo->prepare('SELECT * FROM borrow_requests WHERE id = :id');
+$stmt = $pdo->prepare('SELECT br.*, u.full_name AS student_name FROM borrow_requests br JOIN users u ON u.id = br.user_id WHERE br.id = :id');
 $stmt->execute(['id' => $id]);
-$request = (array) $stmt->fetch();
-if ($request === false || $request === []) {
+$request = $stmt->fetch();
+if ($request === false) {
     abort_404('The requested borrow request does not exist.');
 }
 

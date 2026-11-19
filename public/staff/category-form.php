@@ -11,7 +11,7 @@ if ($id !== false && $id !== null && $id >= 1) {
     $id = (int) $id;
     $statement = $pdo->prepare('SELECT id, name, description FROM categories WHERE id = :id');
     $statement->execute(['id' => $id]);
-    $category = (array) $statement->fetch();
+    $category = $statement->fetch();
     if ($category === []) {
         abort_404('The requested category does not exist.');
     }

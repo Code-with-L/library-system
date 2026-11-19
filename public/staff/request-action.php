@@ -21,7 +21,7 @@ $requestId = (int) $requestId;
 
 $statement = $pdo->prepare('SELECT * FROM borrow_requests WHERE id = :id FOR UPDATE');
 $statement->execute(['id' => $requestId]);
-$request = (array) $statement->fetch();
+$request = $statement->fetch();
 if ($request === false || $request === []) {
     abort_404('The requested borrow request does not exist.');
 }

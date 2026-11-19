@@ -108,7 +108,7 @@ function catalogue_book_get(PDO $pdo, int $id): ?array
           WHERE b.id = :id'
     );
     $statement->execute(['id' => $id]);
-    return (array) $statement->fetch() ?: null;
+    return $statement->fetch() ?: null;
 }
 
 /**
@@ -167,7 +167,7 @@ function catalogue_copy_get(PDO $pdo, int $id): ?array
 {
     $statement = $pdo->prepare('SELECT * FROM book_copies WHERE id = :id');
     $statement->execute(['id' => $id]);
-    return (array) $statement->fetch() ?: null;
+    return $statement->fetch() ?: null;
 }
 
 /**

@@ -62,6 +62,7 @@ require __DIR__ . '/../../includes/header.php';
     <div class="page-actions">
         <a class="btn btn--primary btn--sm" href="<?= e(url('admin/user-form.php')) ?>">Add a user</a>
         <a class="btn btn--ghost btn--sm" href="<?= e(url('admin/users.php')) ?>">Manage users</a>
+        <a class="btn btn--ghost btn--sm" href="<?= e(url('admin/reports.php')) ?>">System reports</a>
     </div>
 </div>
 

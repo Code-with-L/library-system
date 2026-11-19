@@ -15,7 +15,10 @@ if ($role === 'admin') {
         ['key' => 'issue',     'label' => 'Await issue', 'path' => 'staff/issue.php'],
         ['key' => 'returns',   'label' => 'Returns', 'path' => 'staff/returns.php'],
         ['key' => 'fines',     'label' => 'Fines', 'path' => 'staff/fines.php'],
+        ['key' => 'reports',   'label' => 'Reports', 'path' => 'staff/reports/index.php'],
         ['key' => 'users',     'label' => 'User management', 'path' => 'admin/users.php'],
+        ['key' => 'activity',  'label' => 'Activity log', 'path' => 'admin/activity-log.php'],
+        ['key' => 'settings',  'label' => 'Settings', 'path' => 'admin/settings.php'],
         ['key' => 'profile',   'label' => 'My profile', 'path' => 'account/profile.php'],
     ];
 } elseif ($role === 'librarian') {
@@ -26,6 +29,7 @@ if ($role === 'admin') {
         ['key' => 'issue',     'label' => 'Await issue', 'path' => 'staff/issue.php'],
         ['key' => 'returns',   'label' => 'Returns', 'path' => 'staff/returns.php'],
         ['key' => 'fines',     'label' => 'Fines', 'path' => 'staff/fines.php'],
+        ['key' => 'reports',   'label' => 'Reports', 'path' => 'staff/reports/index.php'],
         ['key' => 'profile',   'label' => 'My profile', 'path' => 'account/profile.php'],
     ];
 } else {

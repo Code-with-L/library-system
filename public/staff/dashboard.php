@@ -126,6 +126,18 @@ require __DIR__ . '/../../includes/header.php';
         <?php endif; ?>
     </section>
 
+    <section class="card span-12" aria-labelledby="operational-reports-title">
+        <div class="card__header"><h2 id="operational-reports-title">Operational reports</h2><p>Current lending and catalogue data.</p></div>
+        <div class="card__body">
+            <div class="panel-grid">
+                <article class="stat"><a class="btn btn--ghost btn--sm" href="<?= e(url('staff/reports/borrowing.php')) ?>">Borrowing report</a></article>
+                <article class="stat stat--info"><a class="btn btn--ghost btn--sm" href="<?= e(url('staff/reports/overdue.php')) ?>">Overdue report</a></article>
+                <article class="stat stat--gold"><a class="btn btn--ghost btn--sm" href="<?= e(url('staff/reports/catalogue.php')) ?>">Catalogue report</a></article>
+                <article class="stat"><a class="btn btn--ghost btn--sm" href="<?= e(url('staff/reports/fines.php')) ?>">Fines report</a></article>
+            </div>
+        </div>
+    </section>
+
     <section class="card span-4" aria-labelledby="policy-title">
         <div class="card__header">
             <div>
