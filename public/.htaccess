@@ -1,0 +1,9 @@
+Options -Indexes
+
+# Route Apache-level errors to the application's consistent error pages.
+# If the application is deployed in a subdirectory, prefix these paths with
+# that directory (for example /campus-library/public/404.php).
+ErrorDocument 403 /403.php
+ErrorDocument 404 /404.php
+ErrorDocument 405 /405.php
+ErrorDocument 500 /500.php

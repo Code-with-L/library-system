@@ -1,0 +1,14 @@
+# Local development environment (Docker, credentials, temporary data)
+.dev/
+
+# Local overrides and secrets
+config/config.local.php
+
+# Runtime logs
+storage/logs/*
+!storage/logs/.gitkeep
+
+# Uploaded files (keep the directory, not user uploads)
+public/uploads/covers/*
+!public/uploads/covers/.gitkeep
+!public/uploads/covers/.htaccess

@@ -1,0 +1,69 @@
+/* ============================================================
+   Print styles
+   ============================================================ */
+
+@media print {
+    :root {
+        --paper: #fff;
+    }
+
+    body {
+        background: #fff;
+        color: #000;
+        font-size: 11pt;
+    }
+
+    .sidebar,
+    .topbar,
+    .guest-header,
+    .guest-nav,
+    .site-footer,
+    .alerts,
+    .filters,
+    .pagination,
+    .page-actions,
+    .form-actions,
+    .table__actions,
+    .btn,
+    .nav-toggle {
+        display: none !important;
+    }
+
+    .app-shell {
+        display: block;
+    }
+
+    .content,
+    .guest-main {
+        max-width: none;
+        padding: 0;
+    }
+
+    .card,
+    .stat,
+    .auth-card {
+        border: 1px solid #999;
+        box-shadow: none;
+        break-inside: avoid;
+    }
+
+    .table th {
+        background: #eee;
+        color: #000;
+    }
+
+    a {
+        color: #000;
+        text-decoration: none;
+    }
+
+    a[href]::after {
+        content: " (" attr(href) ")";
+        font-size: 9pt;
+        color: #555;
+    }
+
+    a.btn[href]::after {
+        content: "";
+    }
+}

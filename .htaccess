@@ -1,0 +1,26 @@
+# Protect local development and private files when this directory is itself
+# inside a public web root (for example, XAMPP with campus-library under htdocs).
+
+Options -Indexes
+
+# Deny dotfiles: .dev, .env, .git, .htaccess, logs, and similar.
+<FilesMatch "^\.">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# Deny private/development extensions and files.
+<FilesMatch "\.(dev|env|sql|log|ini|yml|yaml|md|lock|tmp)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>

@@ -1,0 +1,51 @@
+# Image-only allowlist for cover uploads.
+#
+# The default is to serve nothing. The first FilesMatch below denies every file
+# whose name does NOT end with an allowed image extension (`.jpg`, `.jpeg`,
+# `.png`, `.webp`). This is intentionally not a blacklist: SVG/XML/HTML/PHP and
+# all other extensions are absent from the allowed set and are denied by the
+# negative lookahead. The second block is defence in depth.
+
+Options -Indexes -ExecCGI
+
+# Serve only allowed image extensions.
+<FilesMatch "(?i)^(?!.*\.(jpe?g|png|webp)$).*$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# Defence in depth: deny active/script content and other non-image types.
+<FilesMatch "(?i)\.(php|phtml|phar|pl|py|cgi|sh|bash|asp|aspx|jsp|svg|svgz|html|htm|xhtml|xml|exe|dll|so)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# Disable PHP handlers if loaded as a module.
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php8.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php7.c>
+    php_flag engine off
+</IfModule>
+
+# Legitimate image serving metadata.
+AddType image/jpeg .jpg .jpeg
+AddType image/png .png
+AddType image/webp .webp
+
+<FilesMatch "(?i)\.(jpe?g|png|webp)$">
+    Header set X-Content-Type-Options nosniff
+</FilesMatch>
