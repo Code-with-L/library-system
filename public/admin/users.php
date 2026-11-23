@@ -115,7 +115,7 @@ require __DIR__ . '/../../includes/header.php';
         <div class="field field--grow">
             <label for="q">Search</label>
             <input type="search" id="q" name="q" value="<?= e($search) ?>"
-                   placeholder="Name, email or student number" maxlength="120">
+                   placeholder="Name, email or registration number" maxlength="120">
         </div>
 
         <div class="field">

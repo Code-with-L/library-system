@@ -109,6 +109,14 @@ require __DIR__ . '/../../includes/header.php';
     </div>
 </div>
 
+<?php if (email_verification_required() && !email_verification_is_verified($pdo, (int) $user['id'])): ?>
+    <div class="callout callout--warning mb-0" role="status">
+        <p><strong>Verify your email to request books.</strong>
+        You can browse the catalogue, but borrowing requests stay disabled until your address is verified.
+        <a href="<?= e(url('verify-email.php')) ?>">Manage verification</a></p>
+    </div>
+<?php endif; ?>
+
 <div class="stat-grid">
     <article class="stat">
         <p class="stat__label">Active loans</p>
@@ -157,13 +165,13 @@ require __DIR__ . '/../../includes/header.php';
         <div class="card__header">
             <div>
                 <h2 id="my-requests-title">My borrow requests</h2>
-                <p>Requesting titles opens in Phase 3.</p>
+                <p>Requests you have placed and their current status.</p>
             </div>
         </div>
         <?php if ($requests === []): ?>
             <div class="empty-state">
                 <h3>No requests yet</h3>
-                <p>You will be able to browse the catalogue and request a title in the next phase.</p>
+                <p>Browse the catalogue to find a title, then place a borrow request from its detail page.</p>
             </div>
         <?php else: ?>
             <div class="table-wrap">
@@ -202,7 +210,7 @@ require __DIR__ . '/../../includes/header.php';
         <?php if ($loans === []): ?>
             <div class="empty-state">
                 <h3>No loans yet</h3>
-                <p>Issued and returned books will be listed here.</p>
+                <p>Books issued to you and returned loans appear here.</p>
             </div>
         <?php else: ?>
             <div class="table-wrap">

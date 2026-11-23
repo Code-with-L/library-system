@@ -58,6 +58,11 @@ require __DIR__ . '/../../includes/header.php';
                         <td class="nowrap"><form method="post" action="<?= e(url('staff/return-action.php')) ?>">
                             <?= csrf_field() ?>
                             <input type="hidden" name="borrowing_id" value="<?= e((int) $loan['id']) ?>">
+                            <label class="sr-only" for="copy_status_<?= e((int) $loan['id']) ?>">Return condition</label>
+                            <select id="copy_status_<?= e((int) $loan['id']) ?>" name="copy_status" class="btn btn--ghost btn--sm">
+                                <option value="available">Returned</option>
+                                <option value="maintenance">Lost / damaged</option>
+                            </select>
                             <button class="btn btn--ghost btn--sm" type="submit">Record return</button>
                         </form></td>
                     </tr>

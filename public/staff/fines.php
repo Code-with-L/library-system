@@ -17,16 +17,10 @@ $fines = fines_fetch($pdo, $filters, 100);
 
 function phase4_fine_days(PDO $pdo, array $fine): int
 {
-    if ((int) ($fine['borrowing_status'] ?? '') === 0) {
-        return 0;
-    }
-    if ((string) ($fine['borrowing_status'] ?? '') === 'active' && $fine['due_date'] !== null) {
-        return fines_active_overdue_days($pdo, (int) $fine['borrowing_id']);
-    }
-    if ((string) ($fine['borrowing_status'] ?? '') === 'returned' && $fine['return_date'] !== null) {
-        return fines_returned_days((string) $fine['return_date'], (string) $fine['due_date']);
-    }
-    return 0;
+    // The authoritative value is stored with the fine at assessment time.
+    // Recomputing from borrowing status displayed 0 for returned borrowings
+    // because (int)'returned' === 0 in PHP.
+    return max(0, (int) ($fine['days_overdue'] ?? 0));
 }
 
 $pageTitle = 'Fines';

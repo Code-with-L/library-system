@@ -92,7 +92,7 @@ require __DIR__ . '/../../includes/header.php';
         <div class="card__header">
             <div>
                 <h2 id="requests-title">Recent borrow requests</h2>
-                <p>Request review and issuing arrive in Phase 3.</p>
+                <p>Latest requests awaiting review and processing.</p>
             </div>
         </div>
         <?php if ($recentRequests === []): ?>
@@ -160,7 +160,7 @@ require __DIR__ . '/../../includes/header.php';
                     <p class="mb-0"><?= e(format_money($settings['fine_per_day'], (string) $settings['currency_code'])) ?> per day</p>
                 </div>
                 <div class="callout">
-                    <p>Phase 3 will add catalogue management, request review, issuing and returns.</p>
+                    <p>Loan periods, borrowing limits and fine rates are managed by an administrator in Settings.</p>
                 </div>
             </div>
         </div>

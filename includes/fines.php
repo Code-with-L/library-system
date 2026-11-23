@@ -59,9 +59,10 @@ function fines_fetch(PDO $pdo, array $filters = [], int $limit = 100): array
     }
 
     if (!empty($filters['search'])) {
-        $like = '%' . $filters['search'] . '%';
-        $where[] = '(b.id LIKE ? OR u.full_name LIKE ? OR u.email LIKE ?)';
-        $params = array_merge($params, [$like, $like, $like]);
+        $term = str_replace(['!', '%', '_'], ['!!', '!%', '!_'], (string) $filters['search']);
+        $like = '%' . $term . '%';
+        $where[] = "(b.id LIKE ? ESCAPE '!' OR u.full_name LIKE ? ESCAPE '!' OR u.email LIKE ? ESCAPE '!' OR bk.title LIKE ? ESCAPE '!')";
+        $params = array_merge($params, [$like, $like, $like, $like]);
     }
 
     $whereSql = $where === [] ? '' : ' WHERE ' . implode(' AND ', $where);
@@ -91,11 +92,12 @@ function fines_fetch_student(PDO $pdo, int $studentId, array $filters = [], int 
 
     $whereSql = ' WHERE ' . implode(' AND ', $where);
     $statement = $pdo->prepare(
-        'SELECT f.*, b.id AS borrowing_id, b.due_date, b.return_date, b.status AS borrowing_status,
+        'SELECT f.*, b.id AS borrowing_id, bk.title AS book_title, b.due_date, b.return_date, b.status AS borrowing_status,
                 bc.copy_code, u.full_name AS student_name
            FROM fines f
            JOIN borrowings b ON b.id = f.borrowing_id
            JOIN book_copies bc ON bc.id = b.book_copy_id
+           JOIN books bk ON bk.id = bc.book_id
            JOIN users u ON u.id = b.user_id' . $whereSql .
         ' ORDER BY f.id DESC LIMIT :limit'
     );
@@ -133,22 +135,6 @@ function fines_outstanding_total_all(PDO $pdo): array
     return (array) $statement->fetch() ?: [
         'outstanding_balance' => 0, 'outstanding_count' => 0, 'settled_count' => 0,
     ];
-}
-
-function fines_await_assessment(PDO $pdo, int $limit = 50): array
-{
-    $statement = $pdo->prepare(
-        'SELECT br.id AS request_id, br.due_date, br.return_date, u.full_name AS student_name,
-                u.email AS student_email, b.title AS book_title, bc.copy_code, br.user_id
-           FROM borrowings br
-           JOIN book_copies bc ON bc.id = br.book_copy_id
-           JOIN books b ON b.id = bc.book_id
-           JOIN users u ON u.id = br.user_id
-          WHERE br.status = \'active\' AND br.due_date < CURDATE()
-          ORDER BY br.id DESC LIMIT :limit'
-    );
-    $statement->execute(['limit' => $limit]);
-    return (array) $statement->fetchAll();
 }
 
 function fines_active_overdue_days(PDO $pdo, int $borrowingId): int

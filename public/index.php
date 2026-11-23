@@ -27,59 +27,51 @@ require __DIR__ . '/../includes/header.php';
 ?>
 <section class="hero">
     <div class="hero__content">
-        <span class="hero__eyebrow">Campus Library Management</span>
-        <h1>Borrowing, catalogue and accounts in one calm place.</h1>
+        <span class="hero__eyebrow">Campus Library System</span>
+        <h1>Search, borrow, manage &mdash; all in one system.</h1>
         <p class="hero__lead">
-            <?= e($settings['library_name']) ?> brings the catalogue, student borrowing
-            records and staff workflows together. Phase 2 establishes secure accounts,
-            role-based access and administrator user management.
+            <?= e($settings['library_name']) ?> brings the book catalogue, student borrowing
+            records and staff workflows together. Students keep track of their own loans and
+            fines; librarians manage requests, issuing, returns and reports; administrators
+            oversee accounts, settings and activity.
         </p>
 
         <div class="hero__actions">
-            <a class="btn btn--primary" href="<?= e(url('login.php')) ?>">Sign in to your account</a>
-            <a class="btn btn--ghost" href="<?= e(url('register.php')) ?>">Create a student account</a>
+            <a class="btn btn--primary" href="<?= e(url('login.php')) ?>">Sign in</a>
+            <a class="btn btn--ghost" href="<?= e(url('register.php')) ?>">Register as a student</a>
             <?php if ($setupAvailable): ?>
-                <a class="btn btn--secondary" href="<?= e(url('setup-admin.php')) ?>">Complete administrator setup</a>
+                <a class="btn btn--secondary" href="<?= e(url('setup-admin.php')) ?>">Set up the first administrator</a>
             <?php endif; ?>
         </div>
 
         <p class="hero__note">
-            Students register themselves. Librarian and administrator accounts are created by an administrator.
+            Students create their own account. Library staff and administrators sign in with
+            the account details issued to them.
         </p>
     </div>
 
     <aside class="hero__card" aria-labelledby="hero-card-title">
-        <h2 id="hero-card-title">What is available now</h2>
+        <h2 id="hero-card-title">What the system does</h2>
         <ul class="hero__list">
-            <li>Secure sign-in with role-based dashboards</li>
-            <li>Student self-registration and profile management</li>
-            <li>Administrator user creation, editing and deactivation</li>
-            <li>Activity auditing and last-administrator protection</li>
-            <li>Catalogue and circulation foundations prepared for Phase 3</li>
+            <li>Find books by title, author or ISBN and see which copies are available.</li>
+            <li>Students request a title online and follow it until the book is issued.</li>
+            <li>Librarians approve requests, issue copies, record returns and manage fines.</li>
+            <li>Administrators manage accounts, loan rules and library settings.</li>
+            <li>Reports and CSV exports summarise lending, overdue items, stock and fines.</li>
+            <li>Secure sign-in protects each account, and key actions are recorded for review.</li>
         </ul>
     </aside>
 </section>
 
-<?php if (show_demo_credentials()): ?>
-    <div class="review-banner" role="note">
-        <span><strong>Development environment.</strong> Demonstration accounts are available for local review only.</span>
-        <span>
-            Librarian <code>librarian@campus.test</code> / <code>Librarian123!</code>
-            &nbsp;&middot;&nbsp;
-            Student <code>student@campus.test</code> / <code>Student123!</code>
-        </span>
-    </div>
-<?php endif; ?>
-
-<section class="panel-grid" aria-label="System foundations">
+<section class="panel-grid" aria-label="Who the system is for">
     <article class="card span-4">
         <div class="card__body">
             <h3>For students</h3>
             <p class="muted small">
-                Create an account with your student number, keep your contact details current
-                and review your borrowing activity from one dashboard.
+                Register with your registration number, then sign in to search the catalogue,
+                request titles, follow your loans and fines, and keep your profile up to date.
             </p>
-            <a class="btn btn--ghost btn--sm" href="<?= e(url('register.php')) ?>">Register as a student</a>
+            <a class="btn btn--ghost btn--sm" href="<?= e(url('register.php')) ?>">Create a student account</a>
         </div>
     </article>
 
@@ -87,8 +79,8 @@ require __DIR__ . '/../includes/header.php';
         <div class="card__body">
             <h3>For library staff</h3>
             <p class="muted small">
-                Librarian accounts are issued by an administrator. Staff dashboards summarise
-                the catalogue, pending requests and active loans.
+                Librarians manage categories, books and copies; review and approve requests;
+                issue and return stock; track overdue fines; and run reports with CSV export.
             </p>
             <a class="btn btn--ghost btn--sm" href="<?= e(url('login.php')) ?>">Staff sign in</a>
         </div>
@@ -98,8 +90,9 @@ require __DIR__ . '/../includes/header.php';
         <div class="card__body">
             <h3>For administrators</h3>
             <p class="muted small">
-                Administrators manage accounts, roles and access. The last active administrator
-                cannot be demoted or deactivated.
+                Administrators manage staff and student accounts, roles and access, review the
+                activity log, configure loan and fine settings, and view system-wide reports.
+                The last active administrator cannot be demoted or deactivated.
             </p>
             <?php if ($setupAvailable): ?>
                 <a class="btn btn--ghost btn--sm" href="<?= e(url('setup-admin.php')) ?>">Set up the first administrator</a>

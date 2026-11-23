@@ -24,6 +24,7 @@ function catalogue_error_message(string $code): string
     return match ($code) {
         'book_not_available' => 'The book is not currently available.',
         'no_available_copies' => 'There are no available copies of this title.',
+        'email_not_verified' => 'Please verify your email address before requesting books.',
         'max_active_borrowings' => 'You have reached the maximum number of active loans.',
         'duplicate_active_request' => 'You already have an active request for this title.',
         'request_not_closeable' => 'This request can no longer be cancelled.',
@@ -47,8 +48,11 @@ function catalogue_books_fetch(PDO $pdo, array $filters = [], int $offset = 0, i
         $params['category_id'] = (int) $filters['category_id'];
     }
     if (!empty($filters['search'])) {
-        $like = '%' . $filters['search'] . '%';
-        $where[] = '(b.title LIKE :q_title OR b.author LIKE :q_author OR b.isbn LIKE :q_isbn)';
+        // Escape LIKE wildcards so '%' and '_' are matched literally.
+        // '!' is used as the escape character to avoid MySQL backslash rules.
+        $term = str_replace(['!', '%', '_'], ['!!', '!%', '!_'], (string) $filters['search']);
+        $like = '%' . $term . '%';
+        $where[] = "(b.title LIKE :q_title ESCAPE '!' OR b.author LIKE :q_author ESCAPE '!' OR b.isbn LIKE :q_isbn ESCAPE '!')";
         $params['q_title'] = $like;
         $params['q_author'] = $like;
         $params['q_isbn'] = $like;
@@ -56,7 +60,7 @@ function catalogue_books_fetch(PDO $pdo, array $filters = [], int $offset = 0, i
     $whereSql = implode(' AND ', $where);
     $statement = $pdo->prepare(
         'SELECT b.id, b.category_id, b.isbn, b.title, b.author, b.publisher,
-                b.publication_year, b.description, b.status, c.name AS category_name
+                b.publication_year, b.description, b.status, b.cover_image, c.name AS category_name
            FROM books b
            INNER JOIN categories c ON c.id = b.category_id
           WHERE ' . $whereSql . '
@@ -81,8 +85,11 @@ function catalogue_books_count(PDO $pdo, array $filters = []): int
         $params['category_id'] = (int) $filters['category_id'];
     }
     if (!empty($filters['search'])) {
-        $like = '%' . $filters['search'] . '%';
-        $where[] = '(b.title LIKE :q_title OR b.author LIKE :q_author OR b.isbn LIKE :q_isbn)';
+        // Escape LIKE wildcards so '%' and '_' are matched literally.
+        // '!' is used as the escape character to avoid MySQL backslash rules.
+        $term = str_replace(['!', '%', '_'], ['!!', '!%', '!_'], (string) $filters['search']);
+        $like = '%' . $term . '%';
+        $where[] = "(b.title LIKE :q_title ESCAPE '!' OR b.author LIKE :q_author ESCAPE '!' OR b.isbn LIKE :q_isbn ESCAPE '!')";
         $params['q_title'] = $like;
         $params['q_author'] = $like;
         $params['q_isbn'] = $like;
@@ -101,7 +108,7 @@ function catalogue_book_get(PDO $pdo, int $id): ?array
 {
     $statement = $pdo->prepare(
         'SELECT b.id, b.category_id, b.isbn, b.title, b.author, b.publisher,
-                b.publication_year, b.description, b.status, b.created_by, b.created_at,
+                b.publication_year, b.description, b.status, b.cover_image, b.created_by, b.created_at,
                 c.name AS category_name
            FROM books b
            INNER JOIN categories c ON c.id = b.category_id
@@ -193,8 +200,9 @@ function catalogue_requests_fetch(PDO $pdo, array $filters = [], int $limit = 50
         $params['book_id'] = (int) $filters['book_id'];
     }
     if (!empty($filters['search'])) {
-        $like = '%' . $filters['search'] . '%';
-        $where[] = '(b.title LIKE :q_title OR b.author LIKE :q_author OR u.full_name LIKE :q_full_name OR u.email LIKE :q_email)';
+        $term = str_replace(['!', '%', '_'], ['!!', '!%', '!_'], (string) $filters['search']);
+        $like = '%' . $term . '%';
+        $where[] = "(b.title LIKE :q_title ESCAPE '!' OR b.author LIKE :q_author ESCAPE '!' OR u.full_name LIKE :q_full_name ESCAPE '!' OR u.email LIKE :q_email ESCAPE '!')";
         $params['q_title'] = $like;
         $params['q_author'] = $like;
         $params['q_full_name'] = $like;
@@ -249,6 +257,10 @@ function catalogue_student_can_request(PDO $pdo, int $userId, int $bookId): ?str
         return 'no_available_copies';
     }
 
+    if (!email_verification_is_verified($pdo, $userId)) {
+        return 'email_not_verified';
+    }
+
     $settings = get_settings($pdo);
     $activeLoanStmt = $pdo->prepare('SELECT COUNT(*) FROM borrowings WHERE user_id = :id AND status = \'active\'');
     $activeLoanStmt->execute(['id' => $userId]);
@@ -284,6 +296,10 @@ function circulation_request_book(PDO $pdo, int $userId, int $bookId): int
     $book = catalogue_book_get($pdo, $bookId);
     if ($book === null || (string) $book['status'] !== 'active' || catalogue_available_copies($pdo, $bookId) === []) {
         throw new CirculationConflict('book_not_available', 'The requested book is not currently available.');
+    }
+
+    if (!email_verification_is_verified($pdo, $userId)) {
+        throw new CirculationConflict('email_not_verified', 'Please verify your email address before requesting books.');
     }
 
     if (catalogue_student_has_active_request($pdo, $userId, $bookId)) {
@@ -526,6 +542,31 @@ function catalogue_save_copy(PDO $pdo, array $input, ?int $id = null): array
         }
     }
 
+    // Do not let a status edit free or reassign a copy that the circulation
+    // state machine is currently using. This mirrors circulation_rule_f.
+    if ($id !== null && $errors === []) {
+        $current = $pdo->prepare('SELECT status FROM book_copies WHERE id = :id');
+        $current->execute(['id' => $id]);
+        $currentStatus = $current->fetchColumn();
+        if ($currentStatus !== false && (string) $currentStatus !== $status) {
+            $activeRequest = $pdo->prepare(
+                "SELECT 1 FROM borrow_requests
+                  WHERE (reserved_copy_id = :id OR assigned_copy_id = :id)
+                    AND status = 'approved' LIMIT 1"
+            );
+            $activeRequest->execute(['id' => $id]);
+            $activeLoan = $pdo->prepare(
+                "SELECT 1 FROM borrowings
+                  WHERE status = 'active'
+                    AND (active_copy_id = :id OR book_copy_id = :id) LIMIT 1"
+            );
+            $activeLoan->execute(['id' => $id]);
+            if ($activeRequest->fetch() !== false || $activeLoan->fetch() !== false) {
+                $errors['status'] = 'This copy is reserved or on loan; its status cannot be changed here.';
+            }
+        }
+    }
+
     $newId = null;
     if ($errors === []) {
         try {
@@ -567,4 +608,18 @@ function catalogue_save_copy(PDO $pdo, array $input, ?int $id = null): array
     }
 
     return ['errors' => $errors, 'id' => $newId];
+}
+
+/**
+ * Render a book cover thumbnail. Only local uploads/covers paths are accepted;
+ * missing covers render an empty placeholder so the layout stays consistent.
+ */
+function catalogue_cover_markup(array $book, bool $large = false): string
+{
+    $cover = (string) ($book['cover_image'] ?? '');
+    $class = 'book-cover' . ($large ? ' book-cover--lg' : '');
+    if ($cover === '' || strpos($cover, 'uploads/covers/') !== 0) {
+        return '<span class="' . $class . ' book-cover--empty" aria-hidden="true"></span>';
+    }
+    return '<img class="' . $class . '" src="' . e(url($cover)) . '" alt="" loading="lazy">';
 }

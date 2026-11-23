@@ -3,6 +3,7 @@
  * Student catalogue listing: search, category filter and pagination.
  */
 require_once __DIR__ . '/../includes/init.php';
+require_once __DIR__ . '/../includes/pagination.php';
 
 $user = require_role($pdo, 'student');
 
@@ -18,10 +19,12 @@ $offset = ($page - 1) * $perPage;
 $filters = ['category_id' => $categoryId, 'search' => $search];
 
 $total = catalogue_books_count($pdo, $filters);
+$totalPages = max(1, (int) ceil($total / $perPage));
+// Clamp before fetching so an out-of-range page shows the last real page.
+$page = min($page, $totalPages);
+$offset = ($page - 1) * $perPage;
 $books = catalogue_books_fetch($pdo, $filters, $offset, $perPage);
 $categories = $pdo->query('SELECT id, name FROM categories ORDER BY name ASC')->fetchAll();
-$totalPages = max(1, (int) ceil($total / $perPage));
-$page = min($page, $totalPages);
 
 $pageTitle = 'Catalogue';
 $activeNav = 'catalogue';
@@ -62,6 +65,7 @@ require __DIR__ . '/../includes/header.php';
         <table class="table">
             <thead>
                 <tr>
+                    <th scope="col">Cover</th>
                     <th scope="col">Title</th>
                     <th scope="col">Author</th>
                     <th scope="col">Category</th>
@@ -72,6 +76,7 @@ require __DIR__ . '/../includes/header.php';
             <tbody>
                 <?php foreach ($books as $book): ?>
                     <tr>
+                        <td><?= catalogue_cover_markup($book) ?></td>
                         <td><a href="<?= e(url('catalogue/detail.php?id=' . (int) $book['id'])) ?>"><strong><?= e($book['title']) ?></strong></a></td>
                         <td><?= e($book['author']) ?></td>
                         <td><?= e($book['category_name'] ?? '—') ?></td>
@@ -87,14 +92,10 @@ require __DIR__ . '/../includes/header.php';
         Showing <?= e((int) count($books)) ?> of <?= e($total) ?> titles.
     </div>
 
-    <nav aria-label="Catalogue pagination">
-        <ul class="pagination-simple">
-            <?php for ($p = 1; $p <= $totalPages; $p++): ?>
-                <li><a class="pagination-simple__link<?= $p === $page ? ' is-current' : '' ?>"
-                       href="<?= e(url('catalogue.php?category=' . ($categoryId ?? '') . '&q=' . urlencode($search) . '&page=' . $p)) ?>"><?= e($p) ?></a></li>
-            <?php endfor; ?>
-        </ul>
-    </nav>
+    <?php render_pagination($page, $totalPages, 'catalogue.php', [
+        'category' => $categoryId ?? '',
+        'q'        => $search,
+    ]); ?>
 <?php endif; ?>
 
 <?php require __DIR__ . '/../includes/footer.php'; ?>

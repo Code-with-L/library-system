@@ -21,19 +21,42 @@ $settings = get_settings($pdo);
 $libraryName = (string) $settings['library_name'];
 $authenticatedLayout = $user !== null && !$forceGuest;
 $bodyClass = $authenticatedLayout ? 'layout-app' : 'layout-guest';
+$authScripts = ['login.php', 'register.php', 'forgot-password.php', 'reset-password.php', 'verify-email.php', 'mfa.php'];
+if (!$authenticatedLayout && in_array(basename((string) ($_SERVER['SCRIPT_NAME'] ?? '')), $authScripts, true)) {
+    $bodyClass .= ' auth-page';
+}
 ?>
 <!doctype html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Campus Library Management System">
+    <meta name="description" content="Campus Library System &mdash; catalogue, borrowing, fines and reports for students and library staff.">
     <title><?= e($pageTitle) ?> &middot; <?= e($libraryName) ?></title>
+    <link rel="icon" href="<?= e(url('favicon.ico')) ?>" sizes="any">
+    <link rel="icon" type="image/png" sizes="32x32" href="<?= e(url('assets/img/favicon-32.png')) ?>">
+    <link rel="icon" type="image/png" sizes="64x64" href="<?= e(url('assets/img/favicon-64.png')) ?>">
+    <link rel="apple-touch-icon" href="<?= e(url('assets/img/favicon-256.png')) ?>">
     <link rel="stylesheet" href="<?= e(url('assets/css/style.css')) ?>">
+    <link rel="stylesheet" href="<?= e(url('assets/css/loader.css')) ?>">
     <link rel="stylesheet" href="<?= e(url('assets/css/print.css')) ?>" media="print">
     <script src="<?= e(url('assets/js/boot.js')) ?>"></script>
 </head>
 <body class="<?= e($bodyClass) ?>">
+<div class="site-loader" id="site-loader" aria-hidden="true">
+    <div class="site-loader__book">
+        <div class="site-loader__inner">
+            <div class="site-loader__leaf site-loader__leaf--left"></div>
+            <div class="site-loader__middle"></div>
+            <div class="site-loader__leaf site-loader__leaf--right"></div>
+            <ul class="site-loader__pages">
+                <li></li><li></li><li></li><li></li><li></li><li></li>
+                <li></li><li></li><li></li><li></li><li></li><li></li>
+                <li></li><li></li><li></li><li></li><li></li><li></li>
+            </ul>
+        </div>
+    </div>
+</div>
 <a class="skip-link" href="#main-content">Skip to main content</a>
 
 <?php if ($authenticatedLayout): ?>
@@ -74,12 +97,7 @@ $bodyClass = $authenticatedLayout ? 'layout-app' : 'layout-guest';
 <div class="guest-shell">
     <header class="guest-header">
         <a class="brand brand--guest" href="<?= e(url('index.php')) ?>">
-            <span class="brand__mark" aria-hidden="true">
-                <svg viewBox="0 0 32 32" role="img" focusable="false">
-                    <path d="M6 7.5c3.6-1.6 7-.2 10 1.7v16c-3-1.9-6.4-3.3-10-1.7z" fill="currentColor" opacity=".9"/>
-                    <path d="M26 7.5c-3.6-1.6-7-.2-10 1.7v16c3-1.9 6.4-3.3 10-1.7z" fill="currentColor" opacity=".55"/>
-                </svg>
-            </span>
+            <img class="brand__mark" src="<?= e(url('assets/img/logo.png')) ?>" alt="" aria-hidden="true">
             <span class="brand__text">
                 <strong><?= e($libraryName) ?></strong>
                 <small>Campus Library System</small>

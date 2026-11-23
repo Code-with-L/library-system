@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 620" fill="none">
+  <!-- Decorative blobs for the homepage hero. Local SVG; no external request. -->
+  <path d="M120 150c40-70 130-92 194-52 56 35 50 108 100 148 51 40 128 27 148 84 18 52-39 102-96 111-64 10-125-29-182-16-58 13-101 58-152 36-47-21-39-84-18-130 23-50-35-104-34-167z" fill="#0f4c45" opacity=".10"/>
+  <path d="M560 40c50-20 106 16 121 65 14 46-21 93-67 106-50 15-107-9-129-52-20-39-3-87 34-109 11-6 25-9 41-10z" fill="#b0862f" opacity=".10"/>
+
+  <path d="M108 300c33-78 131-107 198-61 47 32 45 98 94 132 54 36 125 20 144 76 16 47-28 88-79 94-65 7-123-31-181-18-59 14-99 57-148 34-46-23-39-82-19-126 22-48-31-99-9-131z" stroke="#0f4c45" stroke-width="2" opacity=".26"/>
+
+  <g stroke="#1d6a60" fill="none" opacity=".26">
+    <circle cx="742" cy="430" r="18" stroke-width="2"/>
+    <circle cx="742" cy="430" r="36" stroke-width="2"/>
+    <circle cx="742" cy="430" r="54" stroke-width="2"/>
+    <circle cx="742" cy="430" r="72" stroke-width="2"/>
+    <circle cx="742" cy="430" r="90" stroke-width="2"/>
+    <circle cx="742" cy="430" r="108" stroke-width="2"/>
+  </g>
+  <circle cx="742" cy="430" r="8" fill="#0f4c45" opacity=".14"/>
+
+  <g fill="#0f4c45" opacity=".12">
+    <circle cx="330" cy="80" r="9"/>
+    <circle cx="362" cy="60" r="4"/>
+    <circle cx="812" cy="180" r="11"/>
+    <circle cx="836" cy="148" r="5"/>
+    <circle cx="80" cy="250" r="6"/>
+  </g>
+</svg>

@@ -7,6 +7,7 @@
  */
 require_once __DIR__ . '/../includes/init.php';
 require_once __DIR__ . '/../includes/users.php';
+require_once __DIR__ . '/../includes/throttles.php';
 require_guest($pdo);
 
 $errors = [];
@@ -20,6 +21,24 @@ $values = [
 
 if (is_post()) {
     verify_csrf();
+
+    // Durable, DB-backed registration throttle. No schema change: it reuses
+    // login_throttles with a namespaced, hashed key. Local dev is exempt.
+    $signupBlocked = false;
+    try {
+        $signupBlocked = signup_throttle_state($pdo)['blocked'];
+    } catch (PDOException $exception) {
+        error_log('Signup throttle state unavailable: ' . $exception->getMessage());
+    }
+    if ($signupBlocked) {
+        $errors['form'] = 'Too many registration attempts. Please wait one hour before trying again.';
+    } else {
+        try {
+            signup_throttle_record($pdo);
+        } catch (PDOException $exception) {
+            error_log('Signup throttle record failed: ' . $exception->getMessage());
+        }
+    }
 
     $input = [
         'full_name'      => $_POST['full_name'] ?? '',
@@ -43,7 +62,7 @@ if (is_post()) {
         'department'     => (string) ($_POST['department'] ?? ''),
     ];
 
-    if ($errors === []) {
+    if ($errors === [] && !$signupBlocked) {
         try {
             $statement = $pdo->prepare(
                 'INSERT INTO users
@@ -65,6 +84,15 @@ if (is_post()) {
             ]);
 
             $newUserId = (int) $pdo->lastInsertId();
+
+            if (email_verification_required()) {
+                email_verification_send($pdo, $newUserId, $result['values']['email']);
+                if (isset($_SESSION['dev_verification_link'])) {
+                    flash('info', 'Local verification link: ' . $_SESSION['dev_verification_link']);
+                    unset($_SESSION['dev_verification_link']);
+                }
+            }
+
             log_activity(
                 $pdo,
                 $newUserId,
@@ -79,7 +107,7 @@ if (is_post()) {
         } catch (PDOException $exception) {
             $driverCode = (int) ($exception->errorInfo[1] ?? 0);
             if ($exception->getCode() === '23000' || $driverCode === 1062) {
-                $errors['form'] = 'That email address or student number is already registered.';
+                $errors['form'] = 'That email address or registration number is already registered.';
             } else {
                 throw $exception;
             }
@@ -91,25 +119,25 @@ $pageTitle = 'Create a student account';
 $forceGuest = true;
 require __DIR__ . '/../includes/header.php';
 ?>
-<div class="auth-wrap">
+<div class="auth-wrap auth-wrap--register">
     <section class="auth-intro">
         <span class="hero__eyebrow">Student registration</span>
         <h1>Join the campus library.</h1>
         <p>
-            Your student number links your library account to your borrowing record.
+            Your registration number links your library account to your borrowing record.
             Use an email address you can access regularly.
         </p>
         <div class="auth-aside">
             <strong>Before you register</strong>
             <ul>
-                <li>Use your official student number.</li>
+                <li>Use your official registration number.</li>
                 <li>Passwords need at least 8 characters, including a letter and a number.</li>
                 <li>Staff accounts cannot be created from this page.</li>
             </ul>
         </div>
     </section>
 
-    <section class="auth-card" aria-labelledby="register-title">
+    <section class="auth-card auth-card--register" aria-labelledby="register-title">
         <h2 id="register-title">Create your account</h2>
         <p class="auth-card__lead">All fields marked required must be completed.</p>
 
@@ -137,7 +165,7 @@ require __DIR__ . '/../includes/header.php';
             </div>
 
             <div class="field">
-                <label for="student_number">Student number</label>
+                <label for="student_number">Registration number</label>
                 <input type="text" id="student_number" name="student_number" maxlength="40"
                        value="<?= e($values['student_number']) ?>" required
                        <?= isset($errors['student_number']) ? 'aria-invalid="true"' : '' ?>>

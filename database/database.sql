@@ -302,6 +302,85 @@ CREATE TABLE activity_logs (
         REFERENCES users (id) ON UPDATE CASCADE ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ------------------------------------------------------------
+-- Durable login throttling (Phase 6 / C-10)
+-- Key is a SHA-256 hash of normalized email + IP; no raw credentials
+-- or identifiers are stored here.
+-- ------------------------------------------------------------
+CREATE TABLE login_throttles (
+    throttle_key CHAR(64) NOT NULL,
+    attempts SMALLINT UNSIGNED NOT NULL,
+    first_attempt_at DATETIME NOT NULL,
+    last_attempt_at DATETIME NOT NULL,
+    PRIMARY KEY (throttle_key),
+    KEY idx_login_throttles_last (last_attempt_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ------------------------------------------------------------
+-- Email verification for student accounts.
+-- Token is stored as a SHA-256 hash only; the raw token is in the email link.
+-- ------------------------------------------------------------
+CREATE TABLE email_verifications (
+    user_id INT UNSIGNED NOT NULL,
+    token_hash CHAR(64) NOT NULL,
+    expires_at DATETIME NOT NULL,
+    verified_at DATETIME NULL DEFAULT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id),
+    KEY idx_email_verifications_token (token_hash),
+    KEY idx_email_verifications_expiry (expires_at),
+    CONSTRAINT fk_email_verifications_user FOREIGN KEY (user_id)
+        REFERENCES users (id) ON UPDATE CASCADE ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ------------------------------------------------------------
+-- Password reset tokens (hash only; one use, short expiry).
+-- ------------------------------------------------------------
+CREATE TABLE password_resets (
+    user_id INT UNSIGNED NOT NULL,
+    token_hash CHAR(64) NOT NULL,
+    expires_at DATETIME NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id),
+    KEY idx_password_resets_token (token_hash),
+    KEY idx_password_resets_expiry (expires_at),
+    CONSTRAINT fk_password_resets_user FOREIGN KEY (user_id)
+        REFERENCES users (id) ON UPDATE CASCADE ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ------------------------------------------------------------
+-- Optional TOTP multi-factor authentication.
+-- ------------------------------------------------------------
+CREATE TABLE user_mfa (
+    user_id INT UNSIGNED NOT NULL,
+    secret VARCHAR(64) NOT NULL,
+    enabled TINYINT(1) NOT NULL DEFAULT 0,
+    recovery_codes TEXT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    enabled_at DATETIME NULL DEFAULT NULL,
+    PRIMARY KEY (user_id),
+    CONSTRAINT fk_user_mfa_user FOREIGN KEY (user_id)
+        REFERENCES users (id) ON UPDATE CASCADE ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ------------------------------------------------------------
+-- Explicit migration version tracking
+-- ------------------------------------------------------------
+CREATE TABLE schema_migrations (
+    version VARCHAR(40) NOT NULL,
+    applied_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    description VARCHAR(255) NULL,
+    PRIMARY KEY (version)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO schema_migrations (version, description) VALUES
+    ('0001', 'users.session_version column'),
+    ('0002', 'fines settlement fields'),
+    ('0003', 'login_throttles durable throttle table'),
+    ('0004', 'email_verifications for student accounts'),
+    ('0005', 'password_resets one-time tokens'),
+    ('0006', 'user_mfa TOTP secrets and recovery codes');
+
 -- ============================================================
 -- Seed data
 -- ============================================================

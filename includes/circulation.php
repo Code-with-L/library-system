@@ -317,6 +317,19 @@ function circulation_fulfil_request(PDO $pdo, int $requestId, int $copyId, int $
             throw new CirculationConflict('copy_already_active_loan', 'The copy already has an active loan.');
         }
 
+        // Re-check the borrowing limit at issue time. Several requests can be
+        // approved while a student has few active loans; issuing all of them
+        // must not push the student past the configured maximum.
+        $settings = get_settings($pdo);
+        $loanCount = $pdo->prepare(
+            'SELECT COUNT(*) FROM borrowings WHERE user_id = :id AND status = \'active\''
+        );
+        $loanCount->execute(['id' => (int) $request['user_id']]);
+        if ((int) $loanCount->fetchColumn() >= (int) $settings['max_active_borrowings']) {
+            throw new CirculationConflict('max_active_borrowings',
+                'The student has reached the maximum number of active loans.');
+        }
+
         $insert = $pdo->prepare(
             'INSERT INTO borrowings
                 (request_id, user_id, book_copy_id, issued_by, issue_date, due_date, status, active_copy_id)
@@ -463,79 +476,6 @@ function circulation_return_borrowing(
 }
 
 /**
- * Rule E — lost, damaged or withdrawn copy.
- */
-function circulation_report_lost_copy(
-    PDO $pdo,
-    int $borrowingId,
-    int $staffId,
-    string $copyStatus = 'maintenance',
-    ?string $notes = null
-): void {
-    circulation_return_borrowing($pdo, $borrowingId, $staffId, date('Y-m-d'), $copyStatus, $notes);
-}
-
-/**
- * Rule F — change a copy status while protecting active circulation state.
- */
-function circulation_change_copy_status(PDO $pdo, int $copyId, string $newStatus): void
-{
-    $allowedStatuses = ['available', 'reserved', 'issued', 'maintenance', 'archived'];
-    if (!in_array($newStatus, $allowedStatuses, true)) {
-        throw new CirculationConflict('invalid_copy_status', 'Invalid copy status.');
-    }
-
-    $pdo->beginTransaction();
-
-    try {
-        $copy = c_lock_copy_for_update($pdo, $copyId);
-        if ($copy === null) {
-            throw new CirculationConflict('copy_not_found', 'Requested copy does not exist.');
-        }
-
-        if ($copy['status'] === $newStatus) {
-            $pdo->commit();
-            return;
-        }
-
-        $activeRequest = $pdo->prepare(
-            "SELECT id
-               FROM borrow_requests
-              WHERE (reserved_copy_id = :copy_id OR assigned_copy_id = :copy_id)
-                AND status = 'approved'
-               LIMIT 1"
-        );
-        $activeRequest->execute(['copy_id' => $copyId]);
-        if ($activeRequest->fetch() !== false) {
-            throw new CirculationConflict('copy_has_approved_request', 'An approved request references this copy.');
-        }
-
-        $activeBorrowing = $pdo->prepare(
-            'SELECT id
-               FROM borrowings
-              WHERE status = \'active\'
-                AND (active_copy_id = :copy_id OR book_copy_id = :copy_id)
-               LIMIT 1'
-        );
-        $activeBorrowing->execute(['copy_id' => $copyId]);
-        if ($activeBorrowing->fetch() !== false) {
-            throw new CirculationConflict('copy_has_active_borrowing', 'An active borrowing references this copy.');
-        }
-
-        $setCopy = $pdo->prepare('UPDATE book_copies SET status = :status WHERE id = :id');
-        $setCopy->execute(['status' => $newStatus, 'id' => $copyId]);
-        c_assert_row_count($setCopy, 1, 'Change copy status: copy update');
-
-        $pdo->commit();
-    } catch (Throwable $exception) {
-        if ($pdo->inTransaction()) {
-            $pdo->rollBack();
-        }
-        throw $exception;
-    }
-}
-
-/**
  * Rule H — integrity audit queries.
  *
  * @return array<int, array{name: string, sql: string}>
@@ -601,38 +541,3 @@ function circulation_audit(PDO $pdo): array
     return $violations;
 }
 
-/**
- * Record an overdue fine in the same transaction as a return.
- *
- * @param array<string, mixed> $fine
- */
-function circulation_record_fine(PDO $pdo, int $borrowingId, array $fine): void
-{
-    $days = (int) $fine['days_overdue'];
-    $rate = (float) $fine['rate_per_day'];
-    $amount = (float) $fine['amount'];
-    if ($days < 1) {
-        throw new CirculationConflict('invalid_fine_days', 'Fine days must be at least 1.');
-    }
-    if ($rate < 0) {
-        throw new CirculationConflict('invalid_fine_rate', 'Fine rate cannot be negative.');
-    }
-    if ($amount < 0) {
-        throw new CirculationConflict('invalid_fine_amount', 'Fine amount cannot be negative.');
-    }
-
-    $statement = $pdo->prepare(
-        'INSERT INTO fines (borrowing_id, days_overdue, rate_per_day, amount)
-         VALUES (:borrowing_id, :days_overdue, :rate_per_day, :amount)'
-    );
-    $statement->execute([
-        'borrowing_id' => $borrowingId,
-        'days_overdue' => $days,
-        'rate_per_day' => $rate,
-        'amount'       => $amount,
-    ]);
-    $fineId = (int) $pdo->lastInsertId();
-    if ($fineId === 0) {
-        throw new CirculationConflict('fine_insert_failed', 'Could not insert the fine.');
-    }
-}

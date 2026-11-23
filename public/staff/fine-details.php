@@ -32,7 +32,7 @@ require __DIR__ . '/../../includes/header.php';
                 <p><strong>Borrowing:</strong> #<?= e((string) $fine['borrowing_id']) ?></p>
                 <p><strong>Student:</strong> <?= e((string) $fine['student_name']) ?></p>
                 <p><strong>Due date:</strong> <?= e(format_date((string) $fine['due_date'] ?? '')) ?></p>
-                <p><strong>Overdue days:</strong> <?= e((string) fines_active_overdue_days($pdo, (int) $fine['borrowing_id'])) ?></p>
+                <p><strong>Overdue days:</strong> <?= e((string) max(0, (int) ($fine['days_overdue'] ?? 0))) ?></p>
                 <p><strong>Rate:</strong> <?= e(fines_format((float) $fine['rate_per_day'], 'KES')) ?> per day</p>
                 <p><strong>Amount:</strong> <?= e(fines_format((float) $fine['amount'], 'KES')) ?></p>
                 <p><strong>Status:</strong> <span class="badge <?= e(badge_class((string) $fine['status'])) ?>"><?= e(status_label((string) $fine['status'])) ?></span></p>

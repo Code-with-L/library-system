@@ -13,6 +13,7 @@
  */
 require_once __DIR__ . '/../includes/init.php';
 require_once __DIR__ . '/../includes/users.php';
+require_once __DIR__ . '/../includes/throttles.php';
 
 if (SETUP_TOKEN === '') {
     abort_404('Administrator setup is not enabled on this installation.');
@@ -36,6 +37,23 @@ if (is_post()) {
     if ($locked) {
         $errors['form'] = 'Administrator setup has already been completed.';
     } else {
+        // Bound online guessing of the one-time token. Local dev is exempt.
+        $setupBlocked = false;
+        try {
+            $setupBlocked = setup_throttle_state($pdo)['blocked'];
+        } catch (PDOException $exception) {
+            error_log('Setup throttle state unavailable: ' . $exception->getMessage());
+        }
+        if ($setupBlocked) {
+            $errors['form'] = 'Too many setup attempts. Please wait one hour before trying again.';
+        } else {
+            try {
+                setup_throttle_record($pdo);
+            } catch (PDOException $exception) {
+                error_log('Setup throttle record failed: ' . $exception->getMessage());
+            }
+        }
+
         $submittedToken = (string) ($_POST['setup_token'] ?? '');
 
         if (!hash_equals((string) SETUP_TOKEN, $submittedToken)) {

@@ -23,7 +23,16 @@ if ($error !== null) {
     redirect('catalogue/detail.php?id=' . (int) $bookId);
 }
 
-$requestId = circulation_request_book($pdo, (int) $user['id'], (int) $bookId);
+try {
+    $requestId = circulation_request_book($pdo, (int) $user['id'], (int) $bookId);
+} catch (CirculationConflict $exception) {
+    // A concurrent duplicate or a limit change can still fail after the
+    // pre-check above. Show a clean validation error instead of a 500.
+    flash('error', catalogue_error_message($exception->getConflictCode()) !== 'The request could not be completed.'
+        ? catalogue_error_message($exception->getConflictCode())
+        : $exception->getMessage());
+    redirect('catalogue/detail.php?id=' . (int) $bookId);
+}
 log_activity($pdo, (int) $user['id'], 'borrow_request_create', 'borrow_request', $requestId, 'Student requested a title.');
 flash('success', 'Your request has been submitted.');
 redirect('catalogue/history.php');

@@ -72,4 +72,28 @@
             button.setAttribute('aria-pressed', showing ? 'false' : 'true');
         });
     });
+
+
+    // Submit a filter form when a quick-range control changes.
+    document.querySelectorAll('[data-auto-submit]').forEach(function (control) {
+        control.addEventListener('change', function () {
+            if (typeof control.form !== 'undefined' && control.form) {
+                control.form.submit();
+            }
+        });
+    });
+
+
+    // Hide the first-load book loader once the page is ready.
+    var loader = document.getElementById('site-loader');
+    if (loader) {
+        var hideLoader = function () { loader.classList.add('is-hidden'); };
+        if (document.readyState === 'complete') {
+            window.setTimeout(hideLoader, 900);
+        } else {
+            window.addEventListener('load', function () { window.setTimeout(hideLoader, 900); });
+        }
+        // Never block the page if something goes wrong.
+        window.setTimeout(hideLoader, 2500);
+    }
 })();

@@ -12,6 +12,7 @@ $filters = reporting_resolve_preset([
     'status' => (string) ($_GET['status'] ?? 'all'),
     'overdue' => (string) ($_GET['overdue'] ?? '') === '1',
     'student_id' => (string) ($_GET['student_id'] ?? ''),
+    'q' => (string) ($_GET['q'] ?? ''),
     'from' => (string) ($_GET['from'] ?? ''),
     'to' => (string) ($_GET['to'] ?? ''),
 ]);
@@ -21,7 +22,7 @@ if ($validated['errors'] !== []) {
     foreach ($validated['errors'] as $error) { flash('error', $error); }
     $page = 1;
 }
-$validated = ['status' => $validated['status'], 'overdue' => $validated['overdue'], 'studentId' => $validated['studentId'], 'from' => $parsed['from'], 'to' => $parsed['to'], 'errors' => $validated['errors']];
+$validated = ['status' => $validated['status'], 'overdue' => $validated['overdue'], 'studentId' => $validated['studentId'], 'q' => $validated['q'], 'from' => $parsed['from'], 'to' => $parsed['to'], 'errors' => $validated['errors']];
 
 $report = reporting_borrowings($pdo, $validated, $page, 50);
 $rows = $report['rows'];

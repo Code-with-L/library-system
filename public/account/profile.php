@@ -68,7 +68,15 @@ if (is_post()) {
         $newPassword = (string) ($_POST['new_password'] ?? '');
         $confirmPassword = (string) ($_POST['new_password_confirm'] ?? '');
 
-        if ($currentPassword === '' || !password_verify($currentPassword, (string) $user['password_hash'])) {
+        $currentPasswordOk = false;
+        if ($currentPassword !== '') {
+            try {
+                $currentPasswordOk = password_verify($currentPassword, (string) $user['password_hash']);
+            } catch (ValueError $exception) {
+                $currentPasswordOk = false;
+            }
+        }
+        if (!$currentPasswordOk) {
             $passwordErrors['current_password'] = 'Your current password is not correct.';
         }
 
@@ -153,10 +161,10 @@ require __DIR__ . '/../../includes/header.php';
                     </div>
 
                     <div class="field">
-                        <label for="student_number_display">Student number</label>
+                        <label for="student_number_display">Registration number</label>
                         <input type="text" id="student_number_display"
                                value="<?= e($user['student_number'] ?? '—') ?>" disabled>
-                        <p class="field__hint">Student numbers are managed by library staff.</p>
+                        <p class="field__hint">Registration numbers are managed by library staff.</p>
                     </div>
 
                     <div class="field">
@@ -230,10 +238,20 @@ require __DIR__ . '/../../includes/header.php';
             </form>
 
             <div class="callout mt-2">
-                <p>Changing your password rotates this session's form token. Other sessions are not affected in Phase 2.</p>
+                <p>Changing your password signs you out of other sessions and refreshes this session's form token.</p>
             </div>
         </div>
     </section>
+
+    <?php if (MFA_ENABLED): ?>
+    <section class="card span-12">
+        <div class="card__header"><h2>Security</h2></div>
+        <div class="card__body">
+            <p class="small muted">Protect your account with a second factor at sign-in.</p>
+            <a class="btn btn--ghost btn--sm" href="<?= e(url('account/mfa.php')) ?>">Two-factor authentication</a>
+        </div>
+    </section>
+    <?php endif; ?>
 
     <section class="card span-12">
         <div class="card__header">

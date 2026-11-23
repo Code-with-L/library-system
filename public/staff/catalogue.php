@@ -16,7 +16,7 @@ require __DIR__ . '/../../includes/header.php';
 <div class="page-intro">
     <div>
         <h2>Catalogue</h2>
-        <p>Search or browse titles, then add or edit books and physical copies.</p>
+        <p>Browse recorded titles, then add or edit books and their physical copies.</p>
     </div>
     <div class="page-actions">
         <a class="btn btn--primary btn--sm" href="<?= e(url('staff/book-form.php')) ?>">Add book</a>

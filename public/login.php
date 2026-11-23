@@ -22,6 +22,15 @@ if (is_post()) {
     $email = normalize_email((string) ($_POST['email'] ?? ''));
     $password = (string) ($_POST['password'] ?? '');
 
+    // Durable, database-backed throttle (Phase 6/C-10). The session counter
+    // remains as a fallback if the migration has not been applied.
+    try {
+        $durable = login_throttle_state($pdo, $email);
+        $blocked = $blocked || $durable['blocked'];
+    } catch (PDOException $exception) {
+        error_log('Durable login throttle unavailable: ' . $exception->getMessage());
+    }
+
     if ($blocked) {
         log_failed_login($pdo, $email);
         $errors['form'] = 'Too many failed sign-in attempts. Please wait 15 minutes before trying again.';
@@ -32,12 +41,25 @@ if (is_post()) {
 
         if ($user !== null) {
             unset($_SESSION['login_throttle']);
+            try {
+                login_throttle_clear($pdo, $email);
+            } catch (PDOException $exception) {
+                error_log('Durable login throttle clear failed: ' . $exception->getMessage());
+            }
+            if (!empty($user['mfa_required'])) {
+                redirect('mfa.php');
+            }
             flash('success', 'Welcome back, ' . $user['full_name'] . '.');
             redirect(dashboard_path_for_role((string) $user['role_name']));
         }
 
         $throttle['count'] = (int) $throttle['count'] + 1;
         $_SESSION['login_throttle'] = $throttle;
+        try {
+            login_throttle_record_failure($pdo, $email);
+        } catch (PDOException $exception) {
+            error_log('Durable login throttle record failed: ' . $exception->getMessage());
+        }
         $errors['form'] = 'Invalid email address or password.';
     }
 }
@@ -59,17 +81,9 @@ require __DIR__ . '/../includes/header.php';
         <span class="hero__eyebrow">Campus Library</span>
         <h1>Your library account, ready when you are.</h1>
         <p>
-            Sign in to reach your dashboard, manage your profile and, in later phases,
-            request titles and track your borrowing.
+            Sign in to reach your dashboard, browse the catalogue and follow your
+            borrowing, requests and fines.
         </p>
-
-        <?php if (show_demo_credentials()): ?>
-            <div class="demo-box">
-                <strong>Local demonstration accounts</strong>
-                Librarian: <code>librarian@campus.test</code> / <code>Librarian123!</code><br>
-                Student: <code>student@campus.test</code> / <code>Student123!</code>
-            </div>
-        <?php endif; ?>
 
         <?php if ($setupAvailable): ?>
             <div class="auth-aside">
@@ -124,7 +138,10 @@ require __DIR__ . '/../includes/header.php';
 
         <div class="auth-meta">
             <p>New student? <a href="<?= e(url('register.php')) ?>">Create an account</a></p>
-            <p class="small">Staff accounts are issued by an administrator.</p>
+            <?php if (PASSWORD_RESET_ENABLED): ?>
+                <p><a href="<?= e(url('forgot-password.php')) ?>">Forgot your password?</a></p>
+            <?php endif; ?>
+            <p class="small">Staff and administrators sign in here with the account details provided to them.</p>
         </div>
     </section>
 </div>

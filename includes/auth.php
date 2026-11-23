@@ -81,6 +81,12 @@ function login_user(PDO $pdo, string $email, string $password): ?array
         $update->execute(['hash' => $newHash, 'id' => $user['id']]);
     }
 
+    // MFA users pause here: no authenticated session until the second factor passes.
+    if (mfa_is_enabled($pdo, (int) $user['id'])) {
+        $_SESSION['mfa_pending_user_id'] = (int) $user['id'];
+        return ['mfa_required' => true];
+    }
+
     session_regenerate_id(true);
     $_SESSION['user_id'] = (int) $user['id'];
     $_SESSION['last_activity'] = time();
@@ -102,6 +108,57 @@ function login_user(PDO $pdo, string $email, string $password): ?array
 
     $user['last_login_at'] = $now;
     return $user;
+}
+
+/**
+ * Durable login throttle backed by the application database (Phase 6, C-10).
+ *
+ * Failed attempts survive session loss because the counter is stored in the
+ * `login_throttles` table. The key is a one-way hash of the normalized email
+ * and request IP, so no credentials or raw identifiers are stored.
+ *
+ * @return array{count: int, first: int, blocked: bool}
+ */
+function login_throttle_state(PDO $pdo, string $email): array
+{
+    $key = hash('sha256', normalize_email($email) . '|' . (request_ip() ?? ''));
+    $statement = $pdo->prepare(
+        'SELECT attempts, first_attempt_at FROM login_throttles WHERE throttle_key = :key'
+    );
+    $statement->execute(['key' => $key]);
+    $row = $statement->fetch();
+
+    if ($row === false) {
+        return ['count' => 0, 'first' => time(), 'blocked' => false];
+    }
+
+    $first = strtotime((string) $row['first_attempt_at']) ?: time();
+    if ((time() - $first) >= 900) {
+        login_throttle_clear($pdo, $email);
+        return ['count' => 0, 'first' => time(), 'blocked' => false];
+    }
+
+    $count = (int) $row['attempts'];
+    return ['count' => $count, 'first' => $first, 'blocked' => $count >= 5];
+}
+
+function login_throttle_record_failure(PDO $pdo, string $email): void
+{
+    $key = hash('sha256', normalize_email($email) . '|' . (request_ip() ?? ''));
+    $now = date('Y-m-d H:i:s');
+    $statement = $pdo->prepare(
+        'INSERT INTO login_throttles (throttle_key, attempts, first_attempt_at, last_attempt_at)
+         VALUES (:key, 1, :now1, :now2)
+         ON DUPLICATE KEY UPDATE attempts = attempts + 1, last_attempt_at = :now3'
+    );
+    $statement->execute(['key' => $key, 'now1' => $now, 'now2' => $now, 'now3' => $now]);
+}
+
+function login_throttle_clear(PDO $pdo, string $email): void
+{
+    $key = hash('sha256', normalize_email($email) . '|' . (request_ip() ?? ''));
+    $statement = $pdo->prepare('DELETE FROM login_throttles WHERE throttle_key = :key');
+    $statement->execute(['key' => $key]);
 }
 
 /**

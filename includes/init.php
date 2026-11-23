@@ -8,6 +8,9 @@
 
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/functions.php';
+require_once __DIR__ . '/email_verification.php';
+require_once __DIR__ . '/password_reset.php';
+require_once __DIR__ . '/mfa.php';
 require_once __DIR__ . '/csrf.php';
 require_once __DIR__ . '/auth.php';
 require_once __DIR__ . '/authorization.php';
@@ -16,10 +19,7 @@ require_once __DIR__ . '/activity.php';
 set_exception_handler('handle_exception');
 
 if (session_status() !== PHP_SESSION_ACTIVE) {
-    $isHttps = (
-        (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
-        || (string) ($_SERVER['SERVER_PORT'] ?? '') === '443'
-    );
+    $isHttps = is_https_request();
 
     $cookieSecure = $isHttps;
     if (SESSION_COOKIE_SECURE_OVERRIDE !== null) {

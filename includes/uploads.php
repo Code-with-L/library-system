@@ -89,6 +89,40 @@ function cover_upload_error(array $file): ?string
 }
 
 /**
+ * Generate a safe server-side filename for a validated cover upload.
+ *
+ * The extension comes from the validated MIME type, never from the original
+ * filename; the basename is random so path traversal and overwrites are not
+ * possible. Call only after cover_upload_error() returns null.
+ */
+function cover_safe_filename(string $validatedMime): string
+{
+    $mimeToExtension = cover_allowed_mime_extensions();
+    if (!isset($mimeToExtension[$validatedMime])) {
+        throw new InvalidArgumentException('Unsupported image type for filename generation.');
+    }
+    $extensions = $mimeToExtension[$validatedMime];
+    $bytes = random_bytes(16);
+    return bin2hex($bytes) . '.' . $extensions[0];
+}
+
+/**
+ * Return a validation error when the cover storage directory is missing or
+ * unwritable, or null when it is ready.
+ */
+function cover_storage_error(): ?string
+{
+    $directory = COVER_UPLOAD_DIR;
+    if (!is_dir($directory)) {
+        return 'Cover storage directory is not available.';
+    }
+    if (!is_writable($directory)) {
+        return 'Cover storage directory is not writable.';
+    }
+    return null;
+}
+
+/**
  * True when the file passes the cover upload validator.
  *
  * @param array<string, mixed> $file

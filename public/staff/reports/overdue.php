@@ -42,6 +42,7 @@ require __DIR__ . '/../../../includes/header.php';
             <thead><tr>
                 <th scope="col">Borrowing</th><th scope="col">Student</th><th scope="col">Book</th><th scope="col">Copy</th>
                 <th scope="col">Due date</th><th scope="col">Days overdue</th><th scope="col">Fine</th>
+                <th scope="col"><span class="sr-only">Actions</span></th>
             </tr></thead>
             <tbody>
                 <?php foreach ($overdueRows as $row): ?>
@@ -53,6 +54,17 @@ require __DIR__ . '/../../../includes/header.php';
                         <td class="nowrap"><?= e(format_date((string) $row['due_date'])) ?></td>
                         <td class="nowrap overdue-cell"><?= e((string) $row['days_overdue']) ?></td>
                         <td class="nowrap"><?= $row['fine_id'] ? e(fines_format((float) $row['fine_amount'], 'KES') . ($row['fine_status'] === 'settled' ? ' (settled)' : ' (outstanding)')) : '—' ?></td>
+                        <td class="nowrap">
+                            <?php if (!$row['fine_id']): ?>
+                                <form method="post" action="<?= e(url('staff/fine-assess-action.php')) ?>">
+                                    <?= csrf_field() ?>
+                                    <input type="hidden" name="borrowing_id" value="<?= e((int) $row['borrowing_id']) ?>">
+                                    <button class="btn btn--ghost btn--sm" type="submit">Assess fine</button>
+                                </form>
+                            <?php else: ?>
+                                <a class="btn btn--ghost btn--sm" href="<?= e(url('staff/fine-details.php?id=' . (int) $row['fine_id'])) ?>">Fine details</a>
+                            <?php endif; ?>
+                        </td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>

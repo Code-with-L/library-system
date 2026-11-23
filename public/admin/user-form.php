@@ -220,7 +220,7 @@ if (is_post()) {
 
             $driverCode = (int) ($exception->errorInfo[1] ?? 0);
             if ($exception->getCode() === '23000' || $driverCode === 1062) {
-                $errors['form'] = 'That email address or student number is already registered.';
+                $errors['form'] = 'That email address or registration number is already registered.';
             } else {
                 throw $exception;
             }
@@ -326,7 +326,7 @@ require __DIR__ . '/../../includes/header.php';
                     </div>
 
                     <div class="field">
-                        <label for="student_number">Student number</label>
+                        <label for="student_number">Registration number</label>
                         <input type="text" id="student_number" name="student_number" maxlength="40"
                                value="<?= e($values['student_number']) ?>"
                                <?= isset($errors['student_number']) ? 'aria-invalid="true"' : '' ?>>

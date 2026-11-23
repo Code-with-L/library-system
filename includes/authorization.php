@@ -64,16 +64,6 @@ function require_guest(PDO $pdo): void
 }
 
 /**
- * Verify that the current student owns the requested record.
- */
-function require_student_owner(int $sessionUserId, int $recordUserId): void
-{
-    if ($sessionUserId !== $recordUserId) {
-        abort_403('You do not have permission to view that record.');
-    }
-}
-
-/**
  * Render the 403 page and stop.
  */
 function abort_403(string $message = 'You do not have permission to access this page.'): void

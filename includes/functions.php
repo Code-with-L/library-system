@@ -183,7 +183,7 @@ function normalize_email(string $email): string
 }
 
 /**
- * Normalize a student number before storage or lookup.
+ * Normalize a registration number before storage or lookup.
  */
 function normalize_student_number(string $number): string
 {
@@ -284,6 +284,32 @@ function get_settings(PDO $pdo): array
 }
 
 /**
+ * Detect HTTPS, including reverse-proxy headers used by shared hosting.
+ *
+ * X-Forwarded-Proto is only trusted when explicitly enabled in protected
+ * configuration (APP_TRUST_PROXY_HEADERS), preventing header spoofing.
+ */
+function is_https_request(): bool
+{
+    if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
+        return true;
+    }
+    if ((string) ($_SERVER['SERVER_PORT'] ?? '') === '443') {
+        return true;
+    }
+    if (defined('APP_TRUST_PROXY_HEADERS') && APP_TRUST_PROXY_HEADERS) {
+        $proto = strtolower((string) ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? ''));
+        if ($proto === 'https') {
+            return true;
+        }
+        if (strtolower((string) ($_SERVER['HTTP_X_FORWARDED_SSL'] ?? '')) === 'on') {
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
  * Strict, external-style Content Security Policy.
  */
 function strict_content_security_policy(): string
@@ -324,25 +350,37 @@ function security_headers(bool $isHttps = false): array
  */
 function handle_exception(Throwable $exception): void
 {
+    // Keep diagnostics useful without writing hosts, database names or
+    // absolute filesystem paths into the protected log file.
+    $scrub = static function (string $text): string {
+        foreach (['DB_HOST', 'DB_NAME', 'DB_USER', 'APP_ROOT', 'APP_PUBLIC_PATH', 'LOG_DIRECTORY'] as $constant) {
+            if (defined($constant) && (string) constant($constant) !== '') {
+                $text = str_replace((string) constant($constant), '[' . $constant . ']', $text);
+            }
+        }
+        $text = preg_replace('/mysql:host=[^;\s]*/i', 'mysql:host=[redacted]', $text) ?? $text;
+        return preg_replace('~(?:[A-Za-z]:)?/[^\s:()]+\.php~', '[path]', $text) ?? $text;
+    };
     $logMessage = sprintf(
-        "[%s] %s in %s:%d\n%s\n",
+        "[%s] %s at line %d\n%s\n",
         date('c'),
-        $exception->getMessage(),
-        $exception->getFile(),
+        $scrub($exception->getMessage()),
         $exception->getLine(),
-        $exception->getTraceAsString()
+        $scrub($exception->getTraceAsString())
     );
     error_log($logMessage);
 
     if (!headers_sent()) {
         http_response_code(500);
         header('Content-Type: text/html; charset=UTF-8');
-        foreach (security_headers() as $name => $value) {
+        foreach (security_headers(is_https_request()) as $name => $value) {
             header($name . ': ' . $value);
         }
     }
 
-    $debugDetail = APP_DEBUG
+    // Debug output is additionally host-restricted so an accidental
+    // APP_DEBUG=true in production cannot expose technical details.
+    $debugDetail = APP_DEBUG && is_local_host_name()
         ? '<pre class="debug-detail">' . e($exception->getMessage()) . '</pre>'
         : '';
 
@@ -381,6 +419,9 @@ function render_error_document(int $code, string $title, string $message): void
         header('X-Content-Type-Options: nosniff');
         header('X-Frame-Options: SAMEORIGIN');
         header('Referrer-Policy: strict-origin-when-cross-origin');
+        foreach (security_headers(is_https_request()) as $name => $value) {
+            header($name . ': ' . $value);
+        }
     }
 
     $homeUrl = e(url('index.php'));

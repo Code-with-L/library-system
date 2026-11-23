@@ -146,7 +146,7 @@ require __DIR__ . '/../../includes/header.php';
         <div class="card__header">
             <div>
                 <h2 id="environment-title">Environment</h2>
-                <p>Verified during Phase 2 development.</p>
+                <p>Current runtime and deployment details.</p>
             </div>
         </div>
         <div class="card__body">
@@ -182,8 +182,9 @@ require __DIR__ . '/../../includes/header.php';
         <div class="card__header">
             <div>
                 <h2 id="activity-title">Recent activity</h2>
-                <p>The eight most recent audit-log entries.</p>
+                <p>The eight most recent audit-log entries, newest first.</p>
             </div>
+            <a class="btn btn--ghost btn--sm" href="<?= e(url('admin/activity-log.php')) ?>">View full log</a>
         </div>
         <?php if ($recentActivity === []): ?>
             <div class="empty-state">
@@ -196,17 +197,22 @@ require __DIR__ . '/../../includes/header.php';
                     <thead>
                         <tr>
                             <th scope="col">When</th>
-                            <th scope="col">Actor</th>
+                            <th scope="col">User</th>
                             <th scope="col">Action</th>
-                            <th scope="col">Description</th>
+                            <th scope="col">Record</th>
+                            <th scope="col">Details</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php foreach ($recentActivity as $entry): ?>
                             <tr>
-                                <td class="nowrap"><?= e(format_datetime((string) $entry['created_at'])) ?></td>
+                                <td class="nowrap">
+                                    <span class="table__primary"><?= e(format_date((string) $entry['created_at'])) ?></span>
+                                    <span class="table__secondary"><?= e(date('H:i', strtotime((string) $entry['created_at']))) ?></span>
+                                </td>
                                 <td><?= e($entry['full_name'] ?? 'System') ?></td>
-                                <td><span class="badge badge--muted"><?= e(status_label((string) $entry['action'])) ?></span></td>
+                                <td><span class="badge badge--info"><?= e(status_label((string) $entry['action'])) ?></span></td>
+                                <td class="nowrap"><?= e((string) ($entry['entity_type'] ?? '—')) ?> #<?= e((string) ($entry['entity_id'] ?? '—')) ?></td>
                                 <td><?= e($entry['description']) ?></td>
                             </tr>
                         <?php endforeach; ?>

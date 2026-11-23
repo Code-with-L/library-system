@@ -38,7 +38,12 @@ if ($copyId < 1 || catalogue_copy_get($pdo, $copyId) === null) {
     redirect('staff/issue.php');
 }
 
-$borrowingId = circulation_fulfil_request($pdo, (int) $request['id'], $copyId, (int) $user['id'], (int) $settings['loan_period_days']);
+try {
+    $borrowingId = circulation_fulfil_request($pdo, (int) $request['id'], $copyId, (int) $user['id'], (int) $settings['loan_period_days']);
+} catch (CirculationConflict $exception) {
+    flash('error', $exception->getMessage());
+    redirect('staff/issue.php');
+}
 
 $dueDateStatement = $pdo->prepare('SELECT due_date FROM borrowings WHERE id = :id');
 $dueDateStatement->execute(['id' => $borrowingId]);

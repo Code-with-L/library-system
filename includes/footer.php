@@ -9,7 +9,7 @@ $currentYear = date('Y');
 
         <footer class="site-footer">
             <p>&copy; <?= e($currentYear) ?> <?= e($libraryName ?? 'Campus Library') ?>. All rights reserved.</p>
-            <p class="site-footer__meta">Built with native PHP, PDO and MySQL.</p>
+            <p class="site-footer__meta">Catalogue, borrowing and library records for students and staff.</p>
         </footer>
     </div>
 </div>

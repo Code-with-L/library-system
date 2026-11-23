@@ -96,6 +96,7 @@ function reporting_borrowing_filters(array $filters): array
     if ($studentId === false || $studentId === null || $studentId < 1) {
         $studentId = null;
     }
+    $q = trim((string) ($filters['q'] ?? ''));
     $parsed = reporting_parse_range($filters);
     $errors = $parsed['errors'];
 
@@ -107,6 +108,7 @@ function reporting_borrowing_filters(array $filters): array
         'status' => $status,
         'overdue' => $overdue,
         'studentId' => $studentId,
+        'q' => $q,
         'from' => $parsed['from'],
         'to' => $parsed['to'],
         'errors' => $errors,
@@ -134,6 +136,14 @@ function reporting_borrowings(PDO $pdo, array $filters, int $page = 1, int $perP
         $where[] = 'br.user_id = :student_id';
         $params['student_id'] = (int) $filters['studentId'];
     }
+    if ((string) ($filters['q'] ?? '') !== '') {
+        $term = str_replace(['!', '%', '_'], ['!!', '!%', '!_'], (string) $filters['q']);
+        // Distinct placeholders: native prepares cannot reuse one named marker.
+        $where[] = "(u.full_name LIKE :q1 ESCAPE '!' OR u.email LIKE :q2 ESCAPE '!' OR b.title LIKE :q3 ESCAPE '!')";
+        $params['q1'] = '%' . $term . '%';
+        $params['q2'] = '%' . $term . '%';
+        $params['q3'] = '%' . $term . '%';
+    }
     if ($filters['from'] !== '' && $filters['to'] !== '') {
         $where[] = '(br.due_date BETWEEN :from AND :to)';
         $params['from'] = (string) $filters['from'];
@@ -141,7 +151,13 @@ function reporting_borrowings(PDO $pdo, array $filters, int $page = 1, int $perP
     }
     $whereSql = implode(' AND ', $where);
 
-    $count = $pdo->prepare('SELECT COUNT(*) FROM borrowings br WHERE ' . $whereSql);
+    $count = $pdo->prepare(
+        'SELECT COUNT(*) FROM borrowings br
+           INNER JOIN book_copies bc ON bc.id = br.book_copy_id
+           INNER JOIN books b ON b.id = bc.book_id
+           LEFT JOIN users u ON u.id = br.user_id
+          WHERE ' . $whereSql
+    );
     $count->execute($params);
     $total = (int) $count->fetchColumn();
     $pages = max(1, (int) ceil($total / $perPage));
@@ -355,9 +371,11 @@ function reporting_activity(PDO $pdo, array $filters, int $page = 1, int $perPag
     $total = (int) $count->fetchColumn();
 
     $rows = $pdo->prepare(
-        'SELECT a.id AS log_id, a.action, a.entity_type, a.entity_id, a.description, a.created_at, u.full_name AS actor_name
+        'SELECT a.id AS log_id, a.action, a.entity_type, a.entity_id, a.description, a.created_at,
+                u.full_name AS actor_name, r.name AS actor_role
            FROM activity_logs a
-           LEFT JOIN users u ON u.id = a.user_id' . ($whereSql !== '' ? ' WHERE ' . $whereSql : '') .
+           LEFT JOIN users u ON u.id = a.user_id
+           LEFT JOIN roles r ON r.id = u.role_id' . ($whereSql !== '' ? ' WHERE ' . $whereSql : '') .
         ' ORDER BY a.id DESC LIMIT :limit OFFSET :offset'
     );
     $rows->execute($params + ['limit' => $perPage, 'offset' => ($page - 1) * $perPage]);

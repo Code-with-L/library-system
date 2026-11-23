@@ -168,7 +168,7 @@ function validate_user_management_input(
 
     if ($role === 'student') {
         if ($studentNumber === '' || mb_strlen($studentNumber) > 40) {
-            $errors['student_number'] = 'A student number is required for student accounts.';
+            $errors['student_number'] = 'A registration number is required for student accounts.';
         }
     } else {
         $studentNumber = '';
@@ -224,7 +224,7 @@ function validate_user_management_input(
         $statement->execute($params);
 
         if ($statement->fetchColumn() !== false) {
-            $errors['student_number'] = 'That student number is already registered.';
+            $errors['student_number'] = 'That registration number is already registered.';
         }
     }
 
