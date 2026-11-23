@@ -329,7 +329,7 @@ require __DIR__ . '/../../includes/header.php';
                     <div class="field">
                         <label for="student_number">Registration number</label>
                         <input type="text" id="student_number" name="student_number" maxlength="20"
-                               placeholder="SIT/B/01-02392/2024" pattern="[A-Z]{3}/[BDCG]/[0-9]{2}-[0-9]{5}/[0-9]{4}"
+                               placeholder="e.g. SIT/B/01-02392/2024" pattern="[A-Z]{3}/[BDCG]/[0-9]{2}-[0-9]{5}/[0-9]{4}"
                                title="MMUST format: XXX/Y/01-00000/YYYY, uppercase letters only"
                                value="<?= e($values['student_number']) ?>"
                                <?= isset($errors['student_number']) ? 'aria-invalid="true"' : '' ?>>
