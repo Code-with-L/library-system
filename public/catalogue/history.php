@@ -25,17 +25,17 @@ require __DIR__ . '/../../includes/header.php';
     <div class="empty-state"><h3>No requests yet</h3><p>Submit a request from a book’s details page.</p></div>
 <?php else: ?>
     <div class="table-wrap">
-        <table class="table">
+        <table class="table table--history">
             <thead><tr>
                 <th>Title</th><th>Status</th><th>Created</th><th><span class="sr-only">Actions</span></th>
             </tr></thead>
             <tbody>
                 <?php foreach ($requests as $request): ?>
                     <tr>
-                        <td><a href="<?= e(url('catalogue/detail.php?id=' . (int) $request['book_id'])) ?>"><?= e($request['book_title']) ?></a></td>
-                        <td><span class="badge <?= e(badge_class((string) $request['status'])) ?>"><?= e(status_label((string) $request['status'])) ?></span></td>
-                        <td class="nowrap"><?= e(format_datetime((string) $request['created_at'])) ?></td>
-                        <td class="nowrap">
+                        <td class="hist-title" data-label="Title"><a href="<?= e(url('catalogue/detail.php?id=' . (int) $request['book_id'])) ?>"><?= e($request['book_title']) ?></a></td>
+                        <td class="hist-status" data-label="Status"><span class="badge <?= e(badge_class((string) $request['status'])) ?>"><?= e(status_label((string) $request['status'])) ?></span></td>
+                        <td class="hist-created" data-label="Created"><?= e(format_datetime((string) $request['created_at'])) ?></td>
+                        <td class="hist-action">
                             <?php if (in_array($request['status'], ['pending', 'approved'], true)): ?>
                                 <form method="post" action="<?= e(url('catalogue/cancel.php')) ?>">
                                     <?= csrf_field() ?>

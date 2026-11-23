@@ -1999,4 +1999,25 @@ select.btn {
         content: attr(data-label); display: block; font-size: .66rem; font-weight: 700;
         letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
     }
+
+    .table--history thead { display: none; }
+    .table--history, .table--history tbody, .table--history tr, .table--history td {
+        display: block; width: 100%;
+    }
+    .table--history tr {
+        display: grid; grid-template-columns: 1fr auto; gap: 6px 12px;
+        padding: 14px 0; border-bottom: 1px solid var(--line);
+    }
+    .table--history tr:last-child { border-bottom: 0; }
+    .table--history td { padding: 0; border: 0; }
+    .table--history .hist-title { grid-column: 1 / -1; font-weight: 700; line-height: 1.35; }
+    .table--history .hist-status,
+    .table--history .hist-created { font-size: .85rem; color: var(--ink-soft); }
+    .table--history .hist-status::before,
+    .table--history .hist-created::before {
+        content: attr(data-label) ": "; color: var(--muted); font-size: .75rem;
+    }
+    .table--history .hist-status .badge { display: inline-block; margin-top: 4px; }
+    .table--history .hist-action { grid-column: 1 / -1; margin-top: 6px; }
+    .table--history .hist-action .btn { width: 100%; min-height: 44px; }
 }
