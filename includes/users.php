@@ -144,7 +144,8 @@ function validate_user_management_input(
     $email = normalize_email((string) ($input['email'] ?? ''));
     $role = (string) ($input['role'] ?? 'student');
     $status = (string) ($input['status'] ?? 'active');
-    $studentNumber = normalize_student_number((string) ($input['student_number'] ?? ''));
+    $studentNumberRaw = trim((string) ($input['student_number'] ?? ''));
+    $studentNumber = normalize_student_number($studentNumberRaw);
     $phone = trim((string) ($input['phone'] ?? ''));
     $department = trim((string) ($input['department'] ?? ''));
     $password = (string) ($input['password'] ?? '');
@@ -167,8 +168,10 @@ function validate_user_management_input(
     }
 
     if ($role === 'student') {
-        if ($studentNumber === '' || mb_strlen($studentNumber) > 40) {
+        if ($studentNumberRaw === '') {
             $errors['student_number'] = 'A registration number is required for student accounts.';
+        } elseif (!is_valid_mmust_registration_number($studentNumberRaw)) {
+            $errors['student_number'] = 'Use the MMUST format XXX/Y/01-00000/YYYY with uppercase letters, e.g. SIT/B/01-02392/2024.';
         }
     } else {
         $studentNumber = '';

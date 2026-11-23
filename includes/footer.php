@@ -13,6 +13,6 @@ $currentYear = date('Y');
         </footer>
     </div>
 </div>
-<script src="<?= e(url('assets/js/app.js')) ?>" defer></script>
+<script src="<?= e(url('assets/js/app.js?v=7')) ?>" defer></script>
 </body>
 </html>

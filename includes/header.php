@@ -33,30 +33,19 @@ if (!$authenticatedLayout && in_array(basename((string) ($_SERVER['SCRIPT_NAME']
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Campus Library System &mdash; catalogue, borrowing, fines and reports for students and library staff.">
     <title><?= e($pageTitle) ?> &middot; <?= e($libraryName) ?></title>
-    <link rel="icon" href="<?= e(url('favicon.ico')) ?>" sizes="any">
-    <link rel="icon" type="image/png" sizes="32x32" href="<?= e(url('assets/img/favicon-32.png')) ?>">
-    <link rel="icon" type="image/png" sizes="64x64" href="<?= e(url('assets/img/favicon-64.png')) ?>">
+    <!-- Light browser chrome: dark green icon. Dark browser chrome: light cream icon. -->
+    <link rel="icon" href="<?= e(url('favicon.ico')) ?>" sizes="any" media="(prefers-color-scheme: light)">
+    <link rel="icon" type="image/png" sizes="32x32" href="<?= e(url('assets/img/favicon-32.png')) ?>" media="(prefers-color-scheme: light)">
+    <link rel="icon" type="image/png" sizes="64x64" href="<?= e(url('assets/img/favicon-64.png')) ?>" media="(prefers-color-scheme: light)">
+    <link rel="icon" href="<?= e(url('assets/img/logo-cream.ico')) ?>" sizes="any" media="(prefers-color-scheme: dark)">
+    <link rel="icon" type="image/png" sizes="32x32" href="<?= e(url('assets/img/logo-cream-32.png')) ?>" media="(prefers-color-scheme: dark)">
+    <link rel="icon" type="image/png" sizes="64x64" href="<?= e(url('assets/img/logo-cream-64.png')) ?>" media="(prefers-color-scheme: dark)">
     <link rel="apple-touch-icon" href="<?= e(url('assets/img/favicon-256.png')) ?>">
-    <link rel="stylesheet" href="<?= e(url('assets/css/style.css')) ?>">
-    <link rel="stylesheet" href="<?= e(url('assets/css/loader.css')) ?>">
-    <link rel="stylesheet" href="<?= e(url('assets/css/print.css')) ?>" media="print">
-    <script src="<?= e(url('assets/js/boot.js')) ?>"></script>
+    <link rel="stylesheet" href="<?= e(url('assets/css/style.css?v=7')) ?>">
+    <link rel="stylesheet" href="<?= e(url('assets/css/print.css?v=7')) ?>" media="print">
+    <script src="<?= e(url('assets/js/boot.js?v=7')) ?>"></script>
 </head>
 <body class="<?= e($bodyClass) ?>">
-<div class="site-loader" id="site-loader" aria-hidden="true">
-    <div class="site-loader__book">
-        <div class="site-loader__inner">
-            <div class="site-loader__leaf site-loader__leaf--left"></div>
-            <div class="site-loader__middle"></div>
-            <div class="site-loader__leaf site-loader__leaf--right"></div>
-            <ul class="site-loader__pages">
-                <li></li><li></li><li></li><li></li><li></li><li></li>
-                <li></li><li></li><li></li><li></li><li></li><li></li>
-                <li></li><li></li><li></li><li></li><li></li><li></li>
-            </ul>
-        </div>
-    </div>
-</div>
 <a class="skip-link" href="#main-content">Skip to main content</a>
 
 <?php if ($authenticatedLayout): ?>

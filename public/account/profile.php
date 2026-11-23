@@ -4,6 +4,7 @@
  */
 require_once __DIR__ . '/../../includes/init.php';
 require_once __DIR__ . '/../../includes/users.php';
+require_once __DIR__ . '/../../includes/schools.php';
 
 $user = require_login($pdo);
 
@@ -176,10 +177,10 @@ require __DIR__ . '/../../includes/header.php';
                     </div>
 
                     <div class="field">
-                        <label for="department">Department</label>
-                        <input type="text" id="department" name="department" maxlength="100"
-                               value="<?= e($profileValues['department']) ?>"
-                               <?= isset($profileErrors['department']) ? 'aria-invalid="true"' : '' ?>>
+                        <label for="department">School / Department</label>
+                        <select id="department" name="department" <?= isset($profileErrors['department']) ? 'aria-invalid="true"' : '' ?>>
+                            <?= mmust_school_options((string) $profileValues['department']) ?>
+                        </select>
                         <?php if (isset($profileErrors['department'])): ?><p class="field__error"><?= e($profileErrors['department']) ?></p><?php endif; ?>
                     </div>
                 </div>

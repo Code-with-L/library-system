@@ -45,7 +45,7 @@ require __DIR__ . '/../includes/header.php';
     </div>
     <div class="filter-group filter-group--narrow">
         <label for="category">Category</label>
-        <select id="category" name="category">
+        <select id="category" name="category" data-auto-submit>
             <option value="">All categories</option>
             <?php foreach ($categories as $category): ?>
                 <option value="<?= e((int) $category['id']) ?>"<?= $categoryId === (int) $category['id'] ? ' selected' : '' ?>><?= e($category['name']) ?></option>

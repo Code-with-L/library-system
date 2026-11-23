@@ -7,6 +7,7 @@
  */
 require_once __DIR__ . '/../includes/init.php';
 require_once __DIR__ . '/../includes/users.php';
+require_once __DIR__ . '/../includes/schools.php';
 require_once __DIR__ . '/../includes/throttles.php';
 require_guest($pdo);
 
@@ -166,17 +167,20 @@ require __DIR__ . '/../includes/header.php';
 
             <div class="field">
                 <label for="student_number">Registration number</label>
-                <input type="text" id="student_number" name="student_number" maxlength="40"
+                <input type="text" id="student_number" name="student_number" maxlength="20"
+                       placeholder="SIT/B/01-02392/2024" pattern="[A-Z]{3}/[BDCG]/[0-9]{2}-[0-9]{5}/[0-9]{4}"
+                       title="MMUST format: XXX/Y/01-00000/YYYY, uppercase letters only"
                        value="<?= e($values['student_number']) ?>" required
                        <?= isset($errors['student_number']) ? 'aria-invalid="true"' : '' ?>>
+                <p class="field__hint">Format: <strong>PROGRAMME/LEVEL/INTAKE-SERIAL/YEAR</strong>, e.g. <strong>SIT/B/01-02392/2024</strong>. Uppercase only &mdash; level: B Bachelor's, D Diploma, C Certificate, G Postgraduate.</p>
                 <?php if (isset($errors['student_number'])): ?><p class="field__error"><?= e($errors['student_number']) ?></p><?php endif; ?>
             </div>
 
             <div class="field">
-                <label for="department">Department <span class="muted">(optional)</span></label>
-                <input type="text" id="department" name="department" maxlength="100"
-                       value="<?= e($values['department']) ?>"
-                       <?= isset($errors['department']) ? 'aria-invalid="true"' : '' ?>>
+                <label for="department">School / Department <span class="muted">(optional)</span></label>
+                <select id="department" name="department" <?= isset($errors['department']) ? 'aria-invalid="true"' : '' ?>>
+                    <?= mmust_school_options((string) $values['department']) ?>
+                </select>
                 <?php if (isset($errors['department'])): ?><p class="field__error"><?= e($errors['department']) ?></p><?php endif; ?>
             </div>
 

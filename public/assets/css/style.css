@@ -1713,8 +1713,8 @@ code, pre {
    Book cover thumbnails (catalogue search and book details)
    ------------------------------------------------------------ */
 .book-cover {
-    display: block; width: 46px; height: 64px; object-fit: cover;
-    border: 1px solid #ddd6c8; border-radius: 3px; background: #f9f6ef;
+    display: block; width: 92px; max-width: none; height: 124px; object-fit: cover; object-position: top center;
+    border: 1px solid #ddd6c8; border-radius: 4px; background: #f9f6ef;
 }
 .book-cover--empty { background: #f4f1ea; }
 .book-cover--lg { float: left; width: 108px; height: 152px; margin: 2px 18px 8px 0; }

@@ -30,22 +30,13 @@ Options -Indexes -ExecCGI
     </IfModule>
 </FilesMatch>
 
-# Disable PHP handlers if loaded as a module.
-<IfModule mod_php.c>
-    php_flag engine off
-</IfModule>
-<IfModule mod_php8.c>
-    php_flag engine off
-</IfModule>
-<IfModule mod_php7.c>
-    php_flag engine off
-</IfModule>
-
 # Legitimate image serving metadata.
 AddType image/jpeg .jpg .jpeg
 AddType image/png .png
 AddType image/webp .webp
 
-<FilesMatch "(?i)\.(jpe?g|png|webp)$">
-    Header set X-Content-Type-Options nosniff
-</FilesMatch>
+<IfModule mod_headers.c>
+    <FilesMatch "(?i)\.(jpe?g|png|webp)$">
+        Header set X-Content-Type-Options nosniff
+    </FilesMatch>
+</IfModule>

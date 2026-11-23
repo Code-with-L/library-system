@@ -191,6 +191,18 @@ function normalize_student_number(string $number): string
 }
 
 /**
+ * Validate an MMUST registration number: XXX/Y/01-00000/YYYY.
+ *
+ * Letters must be UPPERCASE (the check is deliberately case-sensitive), e.g.
+ * SIT/B/01-02392/2024. Y is the academic level: B Bachelor's, D Diploma,
+ * C Certificate, G Postgraduate. The intake/campus code and serial are numeric.
+ */
+function is_valid_mmust_registration_number(string $number): bool
+{
+    return preg_match('/^[A-Z]{3}\/[BDCG]\/[0-9]{2}-[0-9]{5}\/[0-9]{4}$/', trim($number)) === 1;
+}
+
+/**
  * True when the current request comes from a local development host.
  */
 function is_local_host_name(): bool
