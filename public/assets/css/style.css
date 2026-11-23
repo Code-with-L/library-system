@@ -1944,9 +1944,20 @@ select.btn {
 .related-card__author { font-size: .78rem; color: var(--muted); }
 .detail-back { margin: 8px 0 0; }
 
-@media (max-width: 640px) {
+/* Keep the View book button reachable if the table is wider than the screen. */
+.table--catalogue .cat-action,
+.table--catalogue th:last-child {
+    position: sticky; right: 0; z-index: 2;
+    background: var(--surface);
+    box-shadow: -8px 0 10px -8px rgba(27, 42, 47, .35);
+}
+.table--catalogue .cat-action .btn { white-space: nowrap; }
+
+@media (max-width: 860px) {
     /* Replace the wide table with tappable book cards — no sideways scrolling. */
     .table--catalogue thead { display: none; }
+    .table--catalogue .cat-action,
+    .table--catalogue th:last-child { position: static; box-shadow: none; }
     .table--catalogue, .table--catalogue tbody, .table--catalogue tr, .table--catalogue td {
         display: block; width: 100%;
     }

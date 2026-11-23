@@ -333,7 +333,7 @@ require __DIR__ . '/../../includes/header.php';
                                title="MMUST format: XXX/Y/01-00000/YYYY, uppercase letters only"
                                value="<?= e($values['student_number']) ?>"
                                <?= isset($errors['student_number']) ? 'aria-invalid="true"' : '' ?>>
-                        <p class="field__hint">Format: <strong>PROGRAMME/LEVEL/INTAKE-SERIAL/YEAR</strong>, e.g. <strong>SIT/B/01-02392/2024</strong>. Uppercase only &mdash; level: B Bachelor's, D Diploma, C Certificate, G Postgraduate. Required for students; cleared automatically for staff roles.</p>
+                        <p class="field__hint">Required for students; cleared automatically for staff roles.</p>
                         <?php if (isset($errors['student_number'])): ?><p class="field__error"><?= e($errors['student_number']) ?></p><?php endif; ?>
                     </div>
 

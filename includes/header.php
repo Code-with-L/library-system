@@ -41,9 +41,9 @@ if (!$authenticatedLayout && in_array(basename((string) ($_SERVER['SCRIPT_NAME']
     <link rel="icon" type="image/png" sizes="32x32" href="<?= e(url('assets/img/logo-cream-32.png')) ?>" media="(prefers-color-scheme: dark)">
     <link rel="icon" type="image/png" sizes="64x64" href="<?= e(url('assets/img/logo-cream-64.png')) ?>" media="(prefers-color-scheme: dark)">
     <link rel="apple-touch-icon" href="<?= e(url('assets/img/favicon-256.png')) ?>">
-    <link rel="stylesheet" href="<?= e(url('assets/css/style.css?v=8')) ?>">
-    <link rel="stylesheet" href="<?= e(url('assets/css/print.css?v=8')) ?>" media="print">
-    <script src="<?= e(url('assets/js/boot.js?v=8')) ?>"></script>
+    <link rel="stylesheet" href="<?= e(url('assets/css/style.css?v=9')) ?>">
+    <link rel="stylesheet" href="<?= e(url('assets/css/print.css?v=9')) ?>" media="print">
+    <script src="<?= e(url('assets/js/boot.js?v=9')) ?>"></script>
 </head>
 <body class="<?= e($bodyClass) ?>">
 <a class="skip-link" href="#main-content">Skip to main content</a>

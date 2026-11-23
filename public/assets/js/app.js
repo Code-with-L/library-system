@@ -74,6 +74,39 @@
     });
 
 
+    // Capitalise the first letter of each word in name fields as the user types.
+    function capitaliseWords(value) {
+        return value.replace(/\b[a-z]/g, function (letter) { return letter.toUpperCase(); });
+    }
+    document.querySelectorAll('input[name="full_name"]').forEach(function (input) {
+        input.addEventListener('input', function () {
+            var pos = input.selectionStart;
+            var fixed = capitaliseWords(input.value);
+            if (fixed !== input.value) {
+                input.value = fixed;
+                input.setSelectionRange(pos, pos);
+            }
+        });
+        input.addEventListener('blur', function () {
+            input.value = capitaliseWords(input.value.trim());
+        });
+    });
+
+    // Email addresses are case-insensitive; keep them lowercase while typing.
+    document.querySelectorAll('input[type="email"]').forEach(function (input) {
+        input.addEventListener('input', function () {
+            var pos = input.selectionStart;
+            var fixed = input.value.toLowerCase();
+            if (fixed !== input.value) {
+                input.value = fixed;
+                input.setSelectionRange(pos, pos);
+            }
+        });
+        input.addEventListener('blur', function () {
+            input.value = input.value.trim().toLowerCase();
+        });
+    });
+
     // Submit a filter form when a quick-range control changes.
     document.querySelectorAll('[data-auto-submit]').forEach(function (control) {
         control.addEventListener('change', function () {
