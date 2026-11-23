@@ -62,7 +62,7 @@ require __DIR__ . '/../includes/header.php';
     </div>
 <?php else: ?>
     <div class="table-wrap">
-        <table class="table">
+        <table class="table table--catalogue">
             <thead>
                 <tr>
                     <th scope="col">Cover</th>
@@ -76,12 +76,12 @@ require __DIR__ . '/../includes/header.php';
             <tbody>
                 <?php foreach ($books as $book): ?>
                     <tr>
-                        <td><?= catalogue_cover_markup($book) ?></td>
-                        <td><a href="<?= e(url('catalogue/detail.php?id=' . (int) $book['id'])) ?>"><strong><?= e($book['title']) ?></strong></a></td>
-                        <td><?= e($book['author']) ?></td>
-                        <td><?= e($book['category_name'] ?? '—') ?></td>
-                        <td class="nowrap"><?= e((string) $book['status'] === 'active' ? count(catalogue_available_copies($pdo, (int) $book['id'])) : 0) ?> available</td>
-                        <td class="nowrap"><a class="btn btn--ghost btn--sm" href="<?= e(url('catalogue/detail.php?id=' . (int) $book['id'])) ?>">View</a></td>
+                        <td class="cat-cover"><?= catalogue_cover_markup($book) ?></td>
+                        <td class="cat-title" data-label="Title"><a href="<?= e(url('catalogue/detail.php?id=' . (int) $book['id'])) ?>"><strong><?= e($book['title']) ?></strong></a></td>
+                        <td class="cat-author" data-label="Author"><?= e($book['author']) ?></td>
+                        <td class="cat-category" data-label="Category"><?= e($book['category_name'] ?? '—') ?></td>
+                        <td class="cat-available" data-label="Available"><?= e((string) $book['status'] === 'active' ? count(catalogue_available_copies($pdo, (int) $book['id'])) : 0) ?> available</td>
+                        <td class="cat-action"><a class="btn btn--ghost btn--sm" href="<?= e(url('catalogue/detail.php?id=' . (int) $book['id'])) ?>">View book</a></td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>

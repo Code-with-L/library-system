@@ -1871,3 +1871,132 @@ select.btn {
     .auth-card--register .btn { min-height: 34px; }
     .auth-card--register .auth-meta { margin-top: 8px; padding-top: 6px; font-size: .72rem; }
 }
+
+/* ------------------------------------------------------------
+   Book detail page and mobile-friendly catalogue cards
+   ------------------------------------------------------------ */
+.breadcrumb {
+    display: flex; align-items: center; gap: 8px; margin: 0 0 14px;
+    font-size: .82rem; color: var(--muted);
+}
+.breadcrumb a { color: var(--green); font-weight: 600; text-decoration: none; }
+.breadcrumb a:hover { text-decoration: underline; }
+
+.book-hero {
+    display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 30px; align-items: start;
+    margin-bottom: 20px; padding: 26px;
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 14px; box-shadow: var(--shadow-md);
+}
+.book-hero__cover { width: 100%; }
+.book-hero__cover img,
+.book-hero__cover-empty {
+    display: block; width: 100%; aspect-ratio: 3 / 4; object-fit: cover;
+    object-position: top center; border: 1px solid var(--line); border-radius: 10px;
+    background: var(--surface-alt); box-shadow: 0 14px 30px rgba(27, 42, 47, .18);
+}
+.book-hero__cover-empty {
+    display: flex; align-items: center; justify-content: center; padding: 18px;
+    text-align: center; font-family: var(--font-display); font-size: 1.1rem; color: var(--muted);
+}
+.book-hero__eyebrow {
+    margin: 0 0 6px; font-size: .74rem; font-weight: 700;
+    letter-spacing: .12em; text-transform: uppercase; color: var(--green-mid);
+}
+.book-hero__title { margin: 0 0 6px; font-size: 2rem; }
+.book-hero__author { margin: 0 0 16px; font-size: 1.05rem; color: var(--muted); }
+.book-hero__author strong { color: var(--ink); }
+.book-hero__chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+.chip {
+    display: inline-flex; align-items: center; padding: 5px 11px; border-radius: 999px;
+    background: var(--surface-alt); border: 1px solid var(--line);
+    font-size: .8rem; color: var(--ink-soft);
+}
+.chip--strong { background: var(--green-soft); border-color: transparent; color: var(--green); font-weight: 700; }
+.book-hero__actions form { display: inline-block; }
+.book-hero__note { margin: 10px 0 0; font-size: .82rem; color: var(--muted); }
+.btn--lg { min-height: 48px; padding: 12px 24px; font-size: 1rem; }
+.badge--lg { font-size: .92rem; padding: 10px 16px; }
+
+.detail-card { margin-bottom: 20px; }
+.detail-description { margin: 0; line-height: 1.8; white-space: pre-line; }
+.steps { margin: 0; padding-left: 20px; }
+.steps li { margin-bottom: 8px; }
+.steps li:last-child { margin-bottom: 0; }
+.stat-grid--compact { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 0; }
+.stat-grid--compact .stat { padding: 12px 12px; }
+.stat-grid--compact .stat__label { font-size: .62rem; letter-spacing: .03em; white-space: normal; }
+.stat-grid--compact .stat__value { font-size: 1.5rem; }
+
+.related-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.related-card {
+    display: flex; flex-direction: column; gap: 6px; padding: 8px;
+    border: 1px solid var(--line); border-radius: var(--radius-sm);
+    background: var(--surface); color: inherit; text-decoration: none;
+    transition: transform .15s ease, box-shadow .15s ease;
+}
+.related-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.related-card .book-cover { width: 100%; height: auto; aspect-ratio: 3 / 4; object-fit: cover; }
+.related-card__title {
+    font-size: .85rem; font-weight: 700; line-height: 1.35;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.related-card__author { font-size: .78rem; color: var(--muted); }
+.detail-back { margin: 8px 0 0; }
+
+@media (max-width: 640px) {
+    /* Replace the wide table with tappable book cards — no sideways scrolling. */
+    .table--catalogue thead { display: none; }
+    .table--catalogue, .table--catalogue tbody, .table--catalogue tr, .table--catalogue td {
+        display: block; width: 100%;
+    }
+    .table--catalogue tr {
+        display: grid; grid-template-columns: 86px minmax(0, 1fr); gap: 2px 12px;
+        padding: 14px 0; border-bottom: 1px solid var(--line);
+    }
+    .table--catalogue tr:last-child { border-bottom: 0; }
+    .table--catalogue td { padding: 0; border: 0; }
+    .table--catalogue .cat-cover { grid-row: 1 / span 4; }
+    .table--catalogue .book-cover { width: 86px; height: 116px; }
+    .table--catalogue .cat-title { font-size: 1rem; line-height: 1.35; }
+    .table--catalogue .cat-author,
+    .table--catalogue .cat-category,
+    .table--catalogue .cat-available { font-size: .85rem; color: var(--ink-soft); }
+    .table--catalogue .cat-author::before,
+    .table--catalogue .cat-category::before,
+    .table--catalogue .cat-available::before {
+        content: attr(data-label) ": "; color: var(--muted); font-size: .75rem;
+    }
+    .table--catalogue .cat-available { color: var(--green); font-weight: 700; }
+    .table--catalogue .cat-action { grid-column: 1 / -1; margin-top: 8px; }
+    .table--catalogue .cat-action .btn { width: 100%; min-height: 44px; }
+
+    .book-hero { grid-template-columns: 1fr; gap: 18px; padding: 18px; }
+    .book-hero__cover { width: min(66vw, 260px); justify-self: center; }
+    .book-hero__title { font-size: 1.55rem; }
+    .book-hero__author { font-size: .98rem; }
+    .book-hero__actions form,
+    .book-hero__actions .btn { display: block; width: 100%; text-align: center; }
+    .book-hero__note { text-align: center; }
+    .stat-grid--compact { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .stat-grid--compact .stat__value { font-size: 1.25rem; }
+    .related-grid {
+        display: flex; overflow-x: auto; gap: 12px; padding-bottom: 8px;
+        scroll-snap-type: x mandatory;
+    }
+    .related-card { flex: 0 0 132px; scroll-snap-align: start; }
+
+    .table--copies thead { display: none; }
+    .table--copies, .table--copies tbody, .table--copies tr, .table--copies td {
+        display: block; width: 100%;
+    }
+    .table--copies tr {
+        display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px;
+        padding: 12px 0; border-bottom: 1px solid var(--line);
+    }
+    .table--copies td { padding: 0; border: 0; }
+    .table--copies td::before {
+        content: attr(data-label); display: block; font-size: .66rem; font-weight: 700;
+        letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
+    }
+}
