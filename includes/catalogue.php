@@ -614,6 +614,11 @@ function catalogue_save_copy(PDO $pdo, array $input, ?int $id = null): array
  * Render a book cover thumbnail. Only local uploads/covers paths are accepted;
  * missing covers render an empty placeholder so the layout stays consistent.
  */
+function catalogue_availability_label(int $count): string
+{
+    return $count === 0 ? 'Zero' : (string) $count;
+}
+
 function catalogue_cover_markup(array $book, bool $large = false): string
 {
     $cover = (string) ($book['cover_image'] ?? '');

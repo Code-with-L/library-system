@@ -6,7 +6,8 @@ Prepared after the final local verification. **The live site has not been touche
 
 | File | Size | SHA-256 |
 |---|---|---|
-| **`campus-library-infinityfree-v56.zip`** (current) | 280,197 bytes | `972E01BEFA7249C4250047D2883CA7D1F7C43D0062F91C0D10745A730CA7A6BD` |
+| **`campus-library-infinityfree-v57.zip`** (current) | 280,261 bytes | `E79F28BE298E24FFE6FDEEB4E044876466FE8579BF06EB1A19644A49E97C1BDF` |
+| `campus-library-infinityfree-v56.zip` | 280,197 bytes | `972E01BEFA7249C4250047D2883CA7D1F7C43D0062F91C0D10745A730CA7A6BD` |
 | `campus-library-infinityfree-v55.zip` | 280,024 bytes | `79525678BF185B1ED4348DBF958C5EE7D40BC600781B57BC552681A95C8FA132` |
 | `campus-library-infinityfree-v54.zip` | 279,883 bytes | `9E5D93F3286502EFAC0F71D31D5C28E3B1BE47495F2610EC2B226D618DDD34E2` |
 | `campus-library-infinityfree-v53.zip` | 279,879 bytes | `3D31E2DB0A571D817CE63F822A1028F0E2D76E1D542C86D9C749B3D5F51C4A1C` |
@@ -29,6 +30,8 @@ The current app ZIP contains **115 entries** (81 PHP files), no `htdocs/` prefix
 **v55 change:** the "My borrow requests" page now uses mobile cards on phones, removing a 39px horizontal overflow found during a full QA sweep.
 
 **v56 changes:** full-name fields auto-capitalise each word as you type; email fields auto-lowercase. The long registration-number format/diploma note is gone (only the short `e.g.` placeholder remains). Availability now shows just the number (e.g. `Available: 1`), and the **View book** button stays reachable at every screen width (cards up to 860px, sticky action column above that).
+
+**v57 change:** when a title has no copies available, the catalogue and detail page now show the word **Zero** instead of `0`.
 
 **Existing legacy registration numbers** (e.g. `STU-2026-001`) still display and work, but an admin must update them to the MMUST format before they can save that user again.
 
@@ -54,7 +57,7 @@ The current app ZIP contains **115 entries** (81 PHP files), no `htdocs/` prefix
 ## 4. Upload the application
 
 1. InfinityFree File Manager → open the existing **`htdocs/`** document root.
-2. Upload `campus-library-infinityfree-v56.zip` there.
+2. Upload `campus-library-infinityfree-v57.zip` there.
 3. **Extract it directly inside `htdocs/`** — not in the account root. This is the requirement that fixes the old "extract path must be within an htdocs folder" error.
 4. Overwrite existing files when prompted. Keep hidden `.htaccess` files — make sure File Manager shows hidden files.
 5. Confirm the resulting layout:

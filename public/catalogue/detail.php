@@ -71,7 +71,7 @@ require __DIR__ . '/../../includes/header.php';
                 <span class="chip"><?= e($book['publisher']) ?></span>
             <?php endif; ?>
             <span class="chip">ISBN <?= e($book['isbn']) ?></span>
-            <span class="chip chip--strong"><?= e((string) $summary['available']) ?> available</span>
+            <span class="chip chip--strong"><?= e(catalogue_availability_label((int) $summary['available'])) ?> available</span>
         </div>
 
         <div class="book-hero__actions">
